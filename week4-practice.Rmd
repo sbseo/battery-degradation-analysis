@@ -1,0 +1,47 @@
+---
+title: "Week4"
+author: "Bruno Seo"
+date: "6/11/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+```{r}
+# 1
+1-pf(2.7, 3, 5)
+```
+
+
+```{r}
+# 2
+model = lm(Employed ~ GNP + Population + Armed.Forces, data=longley)
+confint(model, level=.9)
+confint(model, level=.9)["GNP", "5 %"]
+
+```
+
+```{r}
+# 3
+coef(summary(model))
+coef(summary(model))["Population", "Std. Error"]
+```
+
+
+```{r}
+# 4
+coef(summary(model))
+coef(summary(model))["Armed.Forces", "Pr(>|t|)"]
+```
+
+```{r}
+# 5
+summary(model)
+summary(model)$fstatistic['value']
+```
+
+
