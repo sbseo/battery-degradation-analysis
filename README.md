@@ -1,2 +1,2 @@
-# STAT420-Methods-of-applied-statistics
+# stat420-methods-of-applied-statistics
 University of Illinois at Urbana-Champaign
