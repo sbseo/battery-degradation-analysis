@@ -65,21 +65,148 @@ Use an $F$-test to test the significance of the regression. Report the following
 
 When reporting these, you should explicitly state them in your document, not assume that a reader will find and interpret them from a large block of `R` output.
 
+- The null and alternative hypotheses
+
+$H_0: \beta_1 =\beta_2 \ beta_3 = 0$ vs $H_1 :$ not $ $H_0$
+
+- The value of the test statistic
+
+```{r}
+library(readr)
+nutri = read.csv("nutrition-2018.csv")
+```
+
+```{r}
+model = lm(Calories ~ Fat + Sugar + Sodium, data = nutri)
+summary(model)
+```
+```{r}
+# F-Statistic
+summary(model)$fstatistic['value']
+```
+
+- The p-value of the test
+
+```{r}
+# P-value
+null_model = lm(Calories ~ 1, data = nutri)
+summary(model)
+# Therefore 2.2e-16
+```
+
+P-value of the test equals to $2.2e-16$.
+
+- A statistical decision at $\alpha = 0.01$
+
+
+Since alpha is much larger than p-value, reject $H_0$.
+
+
+- A conclusion in the context of the problem
+
+There is signifcant amount of evidence that at least one predictor has *relationship* with the Calories(response) given that there are fat, sugar, and sodium in the model. 
+
+
 **(b)** Output only the estimated regression coefficients. Interpret all $\hat{\beta}_j$ coefficients in the context of the problem.
+
+```{r}
+coef(model)[1]
+```
+
+This value is predicted calorie given that there are none of fat, sugar, and sodium in the model. 
+
+
+```{r}
+coef(model)[2]
+?
+```
+
+An increase in fat per gram given that there are sugar and sodium in the model.
+
+
+```{r}
+coef(model)[3]
+```
+
+An increase in sugar per gram given that there are fat and sodium in the model.
+
+
+```{r}
+coef(model)[4]
+```
+
+An increase in Sodium per milligrams given that there are fat and sugar in the model .
+
 
 **(c)** Use your model to predict the number of `Calories` in a Big Mac. According to [McDonald's publicized nutrition facts](https://www.mcdonalds.com/us/en-us/about-our-food/nutrition-calculator.html), the Big Mac contains 30g of fat, 9g of sugar, and 1010mg of sodium.
 
+```{r}
+predict(model, newdata = data.frame(Fat = 30, Sugar = 9, Sodium = 1010))
+```
+
+
 **(d)** Calculate the standard deviation, $s_y$, for the observed values in the Calories variable. Report the value of $s_e$ from your multiple regression model. Interpret both estimates in the context of this problem.
+
+```{r}
+s_y = sd(nutri$Calories)
+s_y # Standard deviation of s_y
+```
+$s_y$ refers to the square root of variance of Calories. This shows the amount which Calories are dissemniated from the mean value.
+
+
+```{r}
+s_e = summary(model)$sigma
+s_e # Residual standard error from multiple regression model
+```
+Residual standard error from multiple regression model of Calories equal to 80.8543. It means estimates of mean calories are “typically” off by 80.8543 *given that Sugar, Fat and Sodium are in the model*. 
+
+
 
 **(e)** Report the value of $R^2$ for the model. Interpret its meaning in the context of the problem.
 
+```{r}
+summary(model)$r.squared
+```
+
+$R^2$ here means that the proportion of observed variation in calories that can be explained by the model equals to 0.7686281 *given that Sugar, Fat and Sodium are in the model*. 
+
+
 **(f)** Calculate a 90% confidence interval for $\beta_2$. Give an interpretation of the interval in the context of the problem.
+
+```{r}
+confint(model, level=.9)['Sugar',]
+```
+
+We are $90%$ confident that for an increase in Sugar of 1 gram, the average increase in calories is between 3.783051 and 4.017983 *given that Fat and Sodium are in the model*.
+
 
 **(g)** Calculate a 95% confidence interval for $\beta_0$. Give an interpretation of the interval in the context of the problem.
 
+```{r}
+confint(model, level=.95)['(Intercept)',]
+```
+
+We are $95\%$ confident that calories are between 97.69443 and 103.21768 where no sugar, no fat, no sodium are used *given that Sugar, Fat and Sodium are in the model*.
+
+
 **(h)** Use a 99% confidence interval to estimate the mean Calorie content of a food with 23g of fat, 0g of sugar, and 400mg of sodium, which is true of a large order of McDonald's french fries. Interpret the interval in context.
  
+```{r}
+predict(model, newdata=data.frame(Fat = 23, Sugar = 0 , Sodium = 400), interval = "confidence", level=.99)
+```
+ 
+ We are $99 \%$ confident that calories are between $294.3532\%$ and $301.7224 \%$ where 23g of fat, 0g of sugar, and 400mg of sodium are used. 
+ 
+ 
 **(i)** Use a 99% prediction interval to predict the Calorie content of a Crunchwrap Supreme, which has 21g of fat, 6g of sugar, and 1200mg of sodium according to [Taco Bell's publicized nutrition information](https://www.tacobell.com/nutrition/info). Interpret the interval in context.
+
+```{r}
+predict(model, newdata=data.frame(Fat = 21, Sugar = 6 , Sodium = 1200), interval = "prediction", level=.99)
+
+```
+
+We are $99 \%$ confident that calories are between $101.0345\%$ and $517.7786 \%$ where 21g of fat, 6g of sugar, and 1200mg of sodium are used. 
+
 
 ***
 
@@ -103,13 +230,33 @@ For this exercise we will consider three models, each with Wins as the response.
 - Model 2: Goals Against, Saves, Shots Against, Minutes, Shutouts
 - Model 3: All Available
 
+```{r}
+goalies = read_csv("goalies.csv")
+model1 = lm(W ~ GA + SV, data=goalies)
+model2 = lm(W ~ GA + SV + SA + MIN + SO, data=goalies)
+model3 = lm(W ~ ., data=goalies)
+```
+
 **(a)** Use an $F$-test to compares Models 1 and 2. Report the following:
 
+
 - The null hypothesis
+$$H_0: \beta_{Shots Against} = \beta_{Minutes} = \beta_{Shutouts} = 0$$ 
 - The value of the test statistic
+```{r}
+# anova(model1, model2)
+anova(model1, model2)$F[2]
+```
+
 - The p-value of the test
+```{r}
+
+```
+
 - A statistical decision at $\alpha = 0.05$
 - The model you prefer
+
+
 
 **(b)** Use an $F$-test to compare Model 3 to your preferred model from part **(a)**. Report the following:
 
