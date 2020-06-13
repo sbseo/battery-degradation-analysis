@@ -89,12 +89,12 @@ summary(model)$fstatistic['value']
 
 ```{r}
 # P-value
-null_model = lm(Calories ~ 1, data = nutri)
+library(broom)
 summary(model)
-# Therefore 2.2e-16
+glance(model)$p.value
 ```
 
-P-value of the test equals to $2.2e-16$.
+P-value of the test is very close to 0, but is not zero. 
 
 - A statistical decision at $\alpha = 0.01$
 
@@ -215,13 +215,13 @@ We are $99 \%$ confident that calories are between $101.0345\%$ and $517.7786 \%
 For this exercise we will use the data stored in [`goalies.csv`](goalies.csv). It contains career data for 462 players in the National Hockey League who played goaltender at some point up to and including the 2014-2015 season. The variables in the dataset are:
  
 - `W` - Wins
-- `GA` - Goals Against
-- `SA` - Shots Against
-- `SV` - Saves
+- `GA` - Goals Against 
+- `SA` - Shots Against 
+- `SV` - Saves 
 - `SV_PCT` - Save Percentage
 - `GAA` - Goals Against Average
-- `SO` - Shutouts
-- `MIN` - Minutes
+- `SO` - Shutouts 
+- `MIN` - Minutes 
 - `PIM` - Penalties in Minutes
 
 For this exercise we will consider three models, each with Wins as the response. The predictors for these models are:
@@ -250,27 +250,62 @@ anova(model1, model2)$F[2]
 
 - The p-value of the test
 ```{r}
-
+anova(model1, model2)
+anova(model1, model2)$"Pr(>F)"[2]
 ```
 
+P-value is a very small number
+
 - A statistical decision at $\alpha = 0.05$
+
+Since $\alpha >$ p-value, reject $H_0$.
+
 - The model you prefer
 
+I prefer model 2 because F statistic is very large while p-value is very small. Shots against, minutes, and shutouts seem to be related to wins.  
 
 
 **(b)** Use an $F$-test to compare Model 3 to your preferred model from part **(a)**. Report the following:
 
 - The null hypothesis
+$$H_0: \beta_{Save Percentage} = \beta_{Goals Against Average} = \beta_{Penalties in Minutes} = 0$$
+
 - The value of the test statistic
+```{r}
+anova(model2, model3)$"F"[2]
+```
+
 - The p-value of the test
+```{r}
+# anova(model2, model3)
+anova(model2, model3)$"Pr(>F)"[2]
+```
+
 - A statistical decision at $\alpha = 0.05$
+
+Since $p-value > \alpha$, do not reject $H_0$.
+
 - The model you prefer
+
+I prefer model2 to model3 because p-value is larger than alpha. 
 
 **(c)** Use a $t$-test to test $H_0: \beta_{\texttt{SV}} = 0 \ \text{vs} \ H_1: \beta_{\texttt{SV}} \neq 0$ for the model you preferred in part **(b)**. Report the following:
 
 - The value of the test statistic
+```{r}
+null = lm(W ~ GA      + SA + MIN + SO, data=goalies)
+full = lm(W ~ GA + SV + SA + MIN + SO, data=goalies)
+anova(null, full)$"F"[2]
+```
+
 - The p-value of the test
+```{r}
+anova(null, full)$"Pr(>F)"[2]
+```
+
 - A statistical decision at $\alpha = 0.05$
+
+Since $\alpha > \text{p-value}$, reject $H_0$.
 
 ***
 
