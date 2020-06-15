@@ -176,7 +176,7 @@ $R^2$ here means that the proportion of observed variation in calories that can 
 confint(model, level=.9)['Sugar',]
 ```
 
-We are $90%$ confident that for an increase in Sugar of 1 gram, the average increase in calories is between 3.783051 and 4.017983 *given that Fat and Sodium are in the model*.
+We are $90\%$ confident that for an increase in Sugar of 1 gram, the average increase in calories is between 3.783051 and 4.017983 *given that Fat and Sodium are in the model*.
 
 
 **(g)** Calculate a 95% confidence interval for $\beta_0$. Give an interpretation of the interval in the context of the problem.
@@ -536,7 +536,7 @@ Report the sum of the diagonal of `C` as well as the 5th row of `sim_data`. For 
 
 ```{r}
 set.seed(420)
-sample_size = 42
+n = 42
 
 x0 = rep(1, n)
 x1 = rnorm(n, 0, 2)
@@ -559,6 +559,7 @@ sim_data = data.frame(y = y,
 # Sum of diagonal
 sum(C[1,1], C[2,2], C[3,3], C[4,4], C[5,5], C[6,6])
 ```
+
 ```{r}
 # 5th row of sim_data
 sim_data[5,]
@@ -615,9 +616,6 @@ sd1
 Therefore, we expect $\hat{\beta_1}$to follow the following normal distribution.
 
 $$\hat{\beta_1} \sim N(\beta_1=`r beta_1`, \sigma^2 = `r sd1`^2)$$
-```{r}
-beta_1
-```
 
 
 **(e)** Calculate the mean and variance of `beta_hat_1`. Are they close to what we would expect? Plot a histogram of `beta_hat_1`. Add a curve for the true distribution of $\hat{\beta}_1$. Does the curve seem to match the histogram?
@@ -642,6 +640,7 @@ curve(dnorm(x, mean = beta_1, sd = sd1),
 
 ```
 
+The true curve seem to match the histogram.
 
 **(f)** What proportion of the p-values stored in `beta_3_pval` is less than 0.10? Is this what you would expect?
 
@@ -659,7 +658,9 @@ exp = coef(summary(model))['x3', 'Pr(>|t|)']
 (ans = count / length(beta_3_pval))
 ```
 
-There are only `r ans` which is less than 0.10. Considering my expected p-value is `r exp`, only few of the p-value turned out to be less than 0.1. Therefore, this result is what I have expected.  
+There are only `r ans` proportion whose beta_3_pval is less than 0.1. Considering my expected p-value is `r exp` where $\alpha = 0.1$, it is easy to expect that only few of the beta_3_pval would be less than 0.1. Therefore, this result matches with what I have expected.  
+
+
 
 **(g)** What proportion of the p-values stored in `beta_5_pval` is less than 0.01? Is this what you would expect?
 
@@ -678,4 +679,4 @@ exp = coef(summary(model))['x5', 'Pr(>|t|)']
 (ans = count / length(beta_5_pval))
 ```
 
-Considering my expected p-value is extremely small as in  `r exp`, it is expected that values in beta_5_pval should be less than 0.01. Therefore, the result above is an expected outcome.
+Considering my expected p-value is extremely small as in  `r exp`, it is easy to expect that values in beta_5_pval should be less than 0.01. Therefore, the result above is an expected outcome.
