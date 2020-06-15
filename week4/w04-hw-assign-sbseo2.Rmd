@@ -67,7 +67,7 @@ When reporting these, you should explicitly state them in your document, not ass
 
 - The null and alternative hypotheses
 
-$H_0: \beta_1 =\beta_2 \ beta_3 = 0$ vs $H_1 :$ not $ $H_0$
+$H_0: \beta_1 = \beta_2 = \beta_3 = 0$ vs $H_1 : \text{not } H_0$
 
 - The value of the test statistic
 
@@ -118,7 +118,6 @@ This value is predicted calorie given that there are none of fat, sugar, and sod
 
 ```{r}
 coef(model)[2]
-?
 ```
 
 An increase in fat per gram given that there are sugar and sodium in the model.
@@ -268,7 +267,7 @@ I prefer model 2 because F statistic is very large while p-value is very small. 
 **(b)** Use an $F$-test to compare Model 3 to your preferred model from part **(a)**. Report the following:
 
 - The null hypothesis
-$$H_0: \beta_{Save Percentage} = \beta_{Goals Against Average} = \beta_{Penalties in Minutes} = 0$$
+$$H_0: \beta_{\text{Save Percentage}} = \beta_{\text{Goals Against Average}} = \beta_{\text{Penalties in Minutes}} = 0$$
 
 - The value of the test statistic
 ```{r}
@@ -283,24 +282,24 @@ anova(model2, model3)$"Pr(>F)"[2]
 
 - A statistical decision at $\alpha = 0.05$
 
-Since $p-value > \alpha$, do not reject $H_0$.
+Since $\alpha > \text{p-value}$, reject $H_0$.
 
 - The model you prefer
 
-I prefer model2 to model3 because p-value is larger than alpha. 
+I prefer model3 to model2 because alpha is larger than p-value. 
 
 **(c)** Use a $t$-test to test $H_0: \beta_{\texttt{SV}} = 0 \ \text{vs} \ H_1: \beta_{\texttt{SV}} \neq 0$ for the model you preferred in part **(b)**. Report the following:
 
 - The value of the test statistic
+
 ```{r}
-null = lm(W ~ GA      + SA + MIN + SO, data=goalies)
-full = lm(W ~ GA + SV + SA + MIN + SO, data=goalies)
-anova(null, full)$"F"[2]
+full = lm(W ~ GA + SA + SV + SV_PCT + GAA + SO + MIN + PIM, data=goalies)
+coef(summary(full))['SV', 't value']
 ```
 
 - The p-value of the test
 ```{r}
-anova(null, full)$"Pr(>F)"[2]
+coef(summary(full))['SV', 'Pr(>|t|)']
 ```
 
 - A statistical decision at $\alpha = 0.05$
@@ -322,13 +321,57 @@ Ozone = Ozone[complete.cases(Ozone), ]
 
 **(a)** Obtain the estimated regression coefficients **without** the use of `lm()` or any other built-in functions for regression. That is, you should use only matrix operations. Store the results in a vector `beta_hat_no_lm`. To ensure this is a vector, you may need to use `as.vector()`. Return this vector as well as the results of `sum(beta_hat_no_lm ^ 2)`.
 
+```{r}
+X = cbind(1, Ozone$wind, Ozone$humidity, Ozone$temp)
+y = cbind(Ozone$ozone)
+
+beta_hat_no_lm = as.vector(solve(t(X) %*% X) %*% t(X) %*% y)
+
+beta_hat_no_lm # Estimated beta parameters 
+sum(beta_hat_no_lm^2) # Sum of squares of beta hat 
+```
+
 **(b)** Obtain the estimated regression coefficients **with** the use of `lm()`. Store the results in a vector `beta_hat_lm`. To ensure this is a vector, you may need to use `as.vector()`. Return this vector as well as the results of `sum(beta_hat_lm ^ 2)`.
+
+
+```{r}
+beta_hat_lm = as.vector(coef(lm(ozone ~ ., data=Ozone)))
+
+beta_hat_lm 
+sum(beta_hat_lm^2)
+```
+
 
 **(c)** Use the `all.equal()` function to verify that the results are the same. You may need to remove the names of one of the vectors. The `as.vector()` function will do this as a side effect, or you can directly use `unname()`.
 
+```{r}
+all.equal(beta_hat_lm, beta_hat_no_lm)
+```
+
+
 **(d)** Calculate $s_e$ without the use of `lm()`. That is, continue with your results from **(a)** and perform additional matrix operations to obtain the result. Output this result. Also, verify that this result is the same as the result obtained from `lm()`.
 
+```{r}
+y_hat = X %*% beta_hat_no_lm
+sqrt(sum((y-y_hat)^2) / (nrow(Ozone)-length(beta_hat_no_lm)))
+```
+
+
 **(e)** Calculate $R^2$ without the use of `lm()`. That is, continue with your results from **(a)** and **(d)**, and perform additional operations to obtain the result. Output this result. Also, verify that this result is the same as the result obtained from `lm()`.
+
+```{r}
+SST = sum((y - mean(y))^2)
+SSR = sum((y_hat - mean(y))^2)
+R_Square = SSR/ SST
+R_Square # R^2 calculated without lm
+
+R_Square_lm = summary(lm(ozone ~ ., data=Ozone))$r.squared
+R_Square_lm # R^2 calculated with lm
+
+all.equal(R_Square, R_Square_lm) # Verification
+```
+
+Verified that obtained value without using lm equals the same with lm.
 
 ***
 
@@ -362,7 +405,7 @@ However, we will now evaluate it on both the **train** set and the **test** set 
 
 Set a seed of `11`, and then split the `Auto` data into two datasets, one called `auto_trn` and one called `auto_tst`. The `auto_trn` data frame should contain 292 randomly chosen observations. The `auto_tst` data will contain the remaining observations. Hint: consider the following code:
 
-```{r, eval = FALSE}
+```{r}
 set.seed(11)
 auto_trn_idx = sample(1:nrow(Auto), 292)
 ```
@@ -373,7 +416,84 @@ Fit a total of five models using the training data.
 - One must use only `displacement` as a predictor.
 - The remaining three you can pick to be anything you like. One of these should be the *best* of the five for predicting the response.
 
+```{r}
+names(Auto)
+```
+```{r}
+auto_trn_idx = sort(auto_trn_idx)
+auto_test_idx = rep(0, nrow(Auto) - length(auto_trn_idx))
+n = 1
+for (i in 1:nrow(Auto)) {
+  if (is.element(i, auto_trn_idx) == FALSE) {
+    auto_test_idx[n] = i
+    n = n + 1
+  }
+}
+
+model1 = lm(mpg ~ ., data=Auto[auto_trn_idx, ])
+model2 = lm(mpg ~ displacement, data=Auto[auto_trn_idx, ])
+model3 = lm(mpg ~ displacement+ weight + year + origin, data=Auto[auto_trn_idx, ])
+model4 = lm(mpg ~ cylinders + displacement + horsepower + weight + acceleration + year, data=Auto[auto_trn_idx, ])
+model5 = lm(mpg ~ cylinders + horsepower + weight + acceleration + year, data=Auto[auto_trn_idx, ])
+
+```
+
+
 For each model report the **train** and **test** RMSE. Arrange your results in a well-formatted markdown table. Argue that one of your models is the best for predicting the response.
+```{r}
+RMSE = function(criterion, model){
+  y = Auto[criterion, ]$mpg
+  y_hat = predict(model, newdata=data.frame(cylinders=Auto[criterion, ]$cylinders,
+                                            displacement=Auto[criterion, ]$displacement,
+                                            horsepower=Auto[criterion, ]$horsepower,
+                                            weight=Auto[criterion, ]$weight,
+                                            acceleration=Auto[criterion, ]$acceleration,
+                                            year=Auto[criterion, ]$year,
+                                            origin=Auto[criterion, ]$origin))
+  sqrt(sum((y - y_hat)^2) / length(y))
+}
+```
+
+```{r}
+# Model1
+# Predictor: All predictors 
+trn_ml1 = RMSE(auto_trn_idx, model1)
+tst_ml1 = RMSE(auto_test_idx, model1)
+
+# Model2
+# Predictor: Displacement 
+trn_ml2 = RMSE(auto_trn_idx, model2)
+tst_ml2 = RMSE(auto_test_idx, model2)
+
+# Model3
+# Predictor: displacement + weight + year + origin
+trn_ml3 = RMSE(auto_trn_idx, model3)
+tst_ml3 = RMSE(auto_test_idx, model3)
+
+# Model4
+# Predictor: cylinders + displacement + horsepower + weight + acceleration + year
+trn_ml4 = RMSE(auto_trn_idx, model4)
+tst_ml4 = RMSE(auto_test_idx, model4)
+
+# Model5
+# Predictor: cylinders + horsepower + weight + acceleration + year
+trn_ml5 = RMSE(auto_trn_idx, model5)
+tst_ml5 = RMSE(auto_test_idx, model5)
+
+df = data.frame(Model1 = c(trn_ml1, tst_ml1),
+                Model2 = c(trn_ml2, tst_ml2),
+                Model3 = c(trn_ml3, tst_ml3),
+                Model4 = c(trn_ml4, tst_ml4),
+                Model5 = c(trn_ml5, tst_ml5))
+```
+
+
+```{r}
+library(knitr)
+kable(t(df), col.names = c("Training", "Testing"))
+```
+
+Among the five models, therefore, model3 is superior to the other models. Model3 uses displacement, weight, year, and origin as its predictors. 
 
 ***
 
@@ -417,9 +537,42 @@ Report the sum of the diagonal of `C` as well as the 5th row of `sim_data`. For 
 ```{r}
 set.seed(420)
 sample_size = 42
+
+x0 = rep(1, n)
+x1 = rnorm(n, 0, 2)
+x2 = runif(n, 0, 4)
+x3 = rnorm(n, 0, 1)
+x4 = runif(n, -2, 2)
+x5 = rnorm(n, 0, 2)
+X = cbind(x0, x1, x2, x3, x4, x5)
+C = solve(t(X) %*% X)
+y = rep(0, n)
+sim_data = data.frame(y = y,
+                      x1 = x1,
+                      x2 = x2,
+                      x3 = x3,
+                      x4 = x4,
+                      x5 = x5)
 ```
 
+```{r}
+# Sum of diagonal
+sum(C[1,1], C[2,2], C[3,3], C[4,4], C[5,5], C[6,6])
+```
+```{r}
+# 5th row of sim_data
+sim_data[5,]
+```
+
+
 **(b)** Create three vectors of length `2500` that will store results from the simulation in part **(c)**. Call them `beta_hat_1`, `beta_3_pval`, and `beta_5_pval`.
+
+```{r}
+beta_hat_1 = rep(0, 2500)
+beta_3_pval = rep(0, 2500)
+beta_5_pval = rep(0, 2500)
+```
+
 
 **(c)** Simulate 2500 samples of size `n = 42` from the model above. Each time update the `y` value of `sim_data`. Then use `lm()` to fit a multiple regression model. Each time store:
 
@@ -427,11 +580,102 @@ sample_size = 42
 - The p-value for the two-sided test of $\beta_3 = 0$ in `beta_3_pval`
 - The p-value for the two-sided test of $\beta_5 = 0$ in `beta_5_pval`
 
+
+```{r}
+beta_0 = 2
+beta_1 = -0.75
+beta_2 = 1.5
+beta_3 = 0
+beta_4 = 0
+beta_5 = 2
+beta = rbind(beta_0, beta_1, beta_2, beta_3, beta_4, beta_5)
+```
+
+```{r}
+for (i in 1:2500) {
+  epsilon = rnorm(n, 0, 5)
+  sim_data$y = beta_0 + beta_1*x1+ beta_2*x2 + beta_3*x3 + beta_4*x4 + beta_5*x5 + epsilon
+  model = lm(y~., data=sim_data)
+
+  beta_hat_1[i] = coef(model)['x1']
+  beta_3_pval[i] = summary(model)$coefficients['x3','Pr(>|t|)']
+  beta_5_pval[i] = summary(model)$coefficients['x5','Pr(>|t|)']
+}
+```
+
+
 **(d)** Based on the known values of $X$, what is the true distribution of $\hat{\beta}_1$?
+
+```{r}
+sd1 = 5 * sqrt(C['x1','x1'])
+sd1
+```
+
+
+Therefore, we expect $\hat{\beta_1}$to follow the following normal distribution.
+
+$$\hat{\beta_1} \sim N(\beta_1=`r beta_1`, \sigma^2 = `r sd1`^2)$$
+```{r}
+beta_1
+```
+
 
 **(e)** Calculate the mean and variance of `beta_hat_1`. Are they close to what we would expect? Plot a histogram of `beta_hat_1`. Add a curve for the true distribution of $\hat{\beta}_1$. Does the curve seem to match the histogram?
 
+```{r}
+# Mean of beta_hat_1
+(mean(beta_hat_1))
+
+# Variance of beta_hat_1
+(var(beta_hat_1))
+
+# Standard deviation of beta_hat_1
+(sd(beta_hat_1))
+```
+
+
+```{r}
+hist(beta_hat_1, prob = TRUE, breaks = 25, border = "dodgerblue", 
+            xlab = expression(hat(beta[1])))
+curve(dnorm(x, mean = beta_1, sd = sd1),
+      col = "darkorange", add = TRUE, lwd = 3)
+
+```
+
+
 **(f)** What proportion of the p-values stored in `beta_3_pval` is less than 0.10? Is this what you would expect?
+
+```{r}
+count = 0
+for (i in 1:length(beta_3_pval)){
+  if (beta_3_pval[i] < 0.1){
+    count = count + 1
+  }
+}
+# Expected P-value 
+exp = coef(summary(model))['x3', 'Pr(>|t|)']
+
+# Proportion
+(ans = count / length(beta_3_pval))
+```
+
+There are only `r ans` which is less than 0.10. Considering my expected p-value is `r exp`, only few of the p-value turned out to be less than 0.1. Therefore, this result is what I have expected.  
 
 **(g)** What proportion of the p-values stored in `beta_5_pval` is less than 0.01? Is this what you would expect?
 
+
+```{r}
+count = 0
+for (i in 1:length(beta_5_pval)){
+  if (beta_5_pval[i] < 0.01){
+    count = count + 1
+  }
+}
+# Expected P-value
+exp = coef(summary(model))['x5', 'Pr(>|t|)']
+
+# Proportion
+(ans = count / length(beta_5_pval))
+```
+
+Considering my expected p-value is extremely small as in  `r exp`, it is expected that values in beta_5_pval should be less than 0.01. Therefore, the result above is an expected outcome.
