@@ -658,8 +658,7 @@ exp = coef(summary(model))['x3', 'Pr(>|t|)']
 (ans = count / length(beta_3_pval))
 ```
 
-There are only `r ans` proportion whose beta_3_pval is less than 0.1. Considering my expected p-value is `r exp` where $\alpha = 0.1$, it is easy to expect that only few of the beta_3_pval would be less than 0.1. Therefore, this result matches with what I have expected.  
-
+There are only `r ans` proportion whose beta_3_pval is less than 0.1. Considering my expected p-value is `r exp` where $\beta_3=0$ and $\alpha = 0.1$, it is easy to expect that only few of the beta_3_pval would be less than 0.1. Therefore, this result matches with what I have expected as in null hypothesis.  
 
 
 **(g)** What proportion of the p-values stored in `beta_5_pval` is less than 0.01? Is this what you would expect?
@@ -679,4 +678,5 @@ exp = coef(summary(model))['x5', 'Pr(>|t|)']
 (ans = count / length(beta_5_pval))
 ```
 
-Considering my expected p-value is extremely small as in  `r exp`, it is easy to expect that values in beta_5_pval should be less than 0.01. Therefore, the result above is an expected outcome.
+Considering my expected p-value is as extremely small as  `r exp`, it is easy to expect that the majority of values in beta_5_pval should be less than 0.01. Since $\beta_5 \neq 0$, we should expect to reject the null hpyothesis. Therefore, the result above is an expected outcome.
+
