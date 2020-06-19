@@ -1,0 +1,158 @@
+---
+title: "week1_quiz"
+author: "Bruno Seo"
+date: "6/19/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+# 1
+library(MASS)
+(length(which(Melanoma$status==1)))
+```
+
+```{r}
+# 2
+mean(Melanoma[which(Melanoma$status == 2), 'age'])
+mean(Melanoma$age[which(Melanoma$status == 2)])
+```
+
+```{r}
+# 3
+mammals
+?mammals
+ratio = mammals$brain / mammals$body
+ratio
+which(ratio == max(ratio))
+mammals[11,][0]
+
+```
+
+```{r}
+# 4
+?iris
+boxplot(rnorm(100))
+
+df = data.frame(
+          sl = iris$Sepal.Length,
+          sw = iris$Sepal.Width,
+          pl = iris$Petal.Length,
+          pw = iris$Petal.Width)
+
+boxplot(df)
+sd(df$pl)
+```
+
+
+```{r, eval=FALSE}
+# 5
+class(z)
+z
+a = min(z[[1]]) 
+b = max(z[[2]])
+c = mean(z[[3]])
+sum(a,b,c)
+```
+
+
+
+```{r}
+# 6
+?airquality
+```
+
+```{r}
+# 7
+mean(airquality[which(airquality$Month == 5), 'Wind'])
+```
+
+
+```{r}
+# 8
+airquality
+mean(na.omit(airquality$Ozone))
+```
+
+
+```{r}
+# 9
+plot(Wind ~ Temp, data=airquality)
+```
+
+
+```{r}
+# 10
+set.seed(1337)
+x = rnorm(10000)
+
+length(x[abs(x)>2]) / length(x)
+```
+
+
+```{r}
+# 11
+# write your function here
+
+f = function(input=42){
+  for (i in 1:length(input)){
+    if (input[i] < 0){
+      input[i] = 0
+    }
+  }
+  input
+}
+
+set.seed(42)
+x = rnorm(100, mean = 0, sd = 10)
+mean(f(input = x)) - f()
+```
+
+```{r}
+# 12
+
+x0 = rep(1, 30)
+x1 = seq(1, 30)^2
+
+set.seed(42)
+y  = 5 * x0 + x1 + rnorm(n = 30, mean = 0 , sd = 1)
+mean(y)
+```
+
+```{r}
+# 13
+X = cbind(x0, x1)
+sum(X[17, ] + X[19, ])
+```
+
+```{r}
+# 14
+beta_hat = solve(t(X) %*% X) %*% t(X) %*% y
+sum(beta_hat)
+```
+
+```{r}
+# 15
+y_hat = X %*% beta_hat
+
+sum((y - y_hat)^2)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

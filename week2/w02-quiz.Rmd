@@ -1,0 +1,100 @@
+---
+title: "w02-quiz2"
+author: "Bruno Seo"
+date: "6/19/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+# 1
+pnorm(6, 10, 4)
+```
+
+
+```{r}
+# 2
+pnorm(3, 5, 4, lower.tail = FALSE)
+```
+
+
+```{r}
+# 3
+pnorm(3, 0, 4, lower.tail=FALSE)
+```
+
+```{r}
+# 4
+model = lm(eruptions ~ waiting, data=faithful)
+coef(model)[1]
+```
+
+```{r}
+# 5
+coef(model)[2]
+```
+
+```{r}
+# 6
+predict(model, newdata = data.frame(waiting=80))
+```
+
+```{r}
+# 7
+predict(model, newdata = data.frame(waiting=120))
+```
+
+```{r}
+# 8
+range(faithful$waiting)
+```
+
+```{r}
+# 9
+sum(model$residuals^2)
+```
+
+```{r}
+# 10
+summary(model)$r.squared
+
+
+```
+
+```{r}
+# 11
+summary(model)$sigma
+sqrt(sum(model$residuals^2) / (length(model$residuals)-2))
+```
+
+```{r}
+# 12
+# The same
+```
+
+```{r}
+# 13
+# A good estimate for the mean of Y when x=0 is -1.5
+```
+
+```{r}
+# 14
+# SLR model assumes that errors are independent
+# SLR model assuems that the relationship between the response and the predictor is linear
+# SLR model assumes that the reponse variable follos normal distribution (False)
+```
+
+
+```{r}
+# 15
+```
+
+
+```{r}
+# 16
+```
+
