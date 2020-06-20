@@ -1,0 +1,99 @@
+---
+title: "w02-quiz2"
+author: "Bruno Seo"
+date: "6/19/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+# 1
+pt(-2.1, 5) * 2
+pt(-2.1, 5) + pt(2.1, 5, lower.tail = FALSE)
+```
+
+```{r}
+# 2
+qt(1-0.1/2, 8)
+```
+
+
+```{r}
+# 3
+beta_1 = 4
+sigma = 4/1.5
+pnorm(4.2, 4, sigma, lower.tail = FALSE)
+```
+
+```{r}
+# 4
+model = lm(eruptions ~ waiting, data=faithful)
+coef(summary(model))['waiting',2]
+```
+
+```{r}
+# 5
+coef(summary(model))['(Intercept)',3]
+
+```
+
+```{r}
+# 6
+coef(summary(model))['waiting',3]
+
+```
+
+```{r}
+# 7
+# Reject H_0
+```
+
+```{r}
+# 8
+confint(model, level=.9)[1,2]
+```
+
+```{r}
+# 9
+confint(model, level=.95)[2,2] - confint(model, level=.95)[2,1] 
+```
+
+```{r}
+# 10
+predict(model, newdata = data.frame(waiting=81) ,interval="confidence", level=.9)
+predict(model, newdata = data.frame(waiting=81) ,interval="confidence", level=.9)[2]
+```
+
+```{r}
+# 11
+predict(model, newdata = data.frame(waiting = 72), interval = "prediction", level=.99)[3]
+```
+
+```{r}
+# 12
+# confidence interval
+```
+
+```{r}
+# 13
+
+```
+
+```{r}
+# 14
+```
+
+
+```{r}
+# 15
+```
+
+
+```{r}
+# 16
+```
+
