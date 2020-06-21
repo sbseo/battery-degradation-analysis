@@ -1,7 +1,7 @@
 ---
-title: "Week4"
+title: "w04-quiz4"
 author: "Bruno Seo"
-date: "6/11/2020"
+date: "6/19/2020"
 output: html_document
 ---
 
@@ -10,38 +10,32 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 
-
 ```{r}
 # 1
-1-pf(2.7, 3, 5)
+pf(2.7, 3, 5, lower.tail=FALSE)
 ```
 
 
 ```{r}
 # 2
-model = lm(Employed ~ GNP + Population + Armed.Forces, data=longley)
-confint(model, level=.9)
-confint(model, level=.9)["GNP", "5 %"]
-
+longley
+model = lm(Employed ~ GNP + Population + Armed.Forces , data=longley)
+confint(model, level=.9)[2,1]
 ```
+
 
 ```{r}
 # 3
 coef(summary(model))
-coef(summary(model))["Population", "Std. Error"]
+coef(summary(model))[3,2]
 ```
-
 
 ```{r}
 # 4
-coef(summary(model))
-coef(summary(model))["Armed.Forces", "Pr(>|t|)"]
+coef(summary(model))[4,4]
 ```
 
 ```{r}
 # 5
-summary(model)
-summary(model)$fstatistic['value']
+summary(model)$fstatistic[1]
 ```
-
-

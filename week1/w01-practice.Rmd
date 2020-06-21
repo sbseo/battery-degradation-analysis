@@ -1,0 +1,60 @@
+---
+title: "w01-practice1"
+author: "Bruno Seo"
+date: "6/19/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+# 1
+x = 1:100
+sum(log(x))
+```
+
+
+```{r}
+# 2
+set.seed(42)
+a_vector = rpois(250, lambda = 6)
+length(a_vector[a_vector >= 5])
+```
+
+
+```{r}
+# 3
+odd = seq(1, 100, 2)
+even = seq(2, 100, 2)
+y = rep(1, 100)
+for (i in even){
+  y[i] = x[i] - 10
+}
+for (i in odd){
+  y[i] = x[i] + 5
+}
+sd(y)
+
+```
+
+```{r}
+# 4
+quiz_list = list(
+  x = c(1, 2),
+  y = "Hello Quiz Taker",
+  z = "z"
+)
+quiz_list[[3]]
+quiz_list$z
+
+```
+
+```{r}
+# 5
+library(MASS)
+hist(Melanoma$age)
+
+```

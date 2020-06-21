@@ -1,0 +1,39 @@
+---
+title: "w03-quiz3"
+author: "Bruno Seo"
+date: "6/19/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+# 1
+pt(1.3, 7, lower.tail=FALSE)
+```
+
+
+```{r}
+# 2
+qt(0.025, 9, lower.tail=FALSE)
+```
+
+```{r}
+# 3
+model = lm(Girth ~ Height, data=trees)
+coef(summary(model))[2,'Pr(>|t|)']
+```
+
+```{r}
+# 4
+confint(model, level=.90)[2,2] - 
+confint(model, level=.90)[2,1]
+```
+
+```{r}
+# 5
+predict(model, newdata=data.frame(Height=79) , level=.95, interval="confidence")[3]
+```

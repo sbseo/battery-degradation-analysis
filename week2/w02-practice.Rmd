@@ -1,0 +1,40 @@
+---
+title: "w02-practice"
+author: "Bruno Seo"
+date: "6/19/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+# 1
+pnorm(4, 5, 3, lower.tail = FALSE)
+```
+
+
+```{r}
+# 2
+2.5 * 5 - 3
+```
+
+
+```{r}
+# 3
+2
+```
+
+```{r}
+# 4
+model = lm(Girth ~ Height, data=trees)
+coef(model)
+coef(model)[2]
+```
+
+```{r}
+# 5
+summary(model)$r.squared
+```
