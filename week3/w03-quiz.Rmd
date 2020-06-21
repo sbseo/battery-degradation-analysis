@@ -26,7 +26,7 @@ qt(1-0.1/2, 8)
 # 3
 beta_1 = 4
 sigma = 4/1.5
-pnorm(4.2, 4, sigma, lower.tail = FALSE)
+pnorm(4.2, 4, sqrt(sigma), lower.tail = FALSE)
 ```
 
 ```{r}
@@ -37,7 +37,7 @@ coef(summary(model))['waiting',2]
 
 ```{r}
 # 5
-coef(summary(model))['(Intercept)',3]
+coef(summary(model))[['(Intercept)',3]]
 
 ```
 
@@ -59,7 +59,7 @@ confint(model, level=.9)[1,2]
 
 ```{r}
 # 9
-confint(model, level=.95)[2,2] - confint(model, level=.95)[2,1] 
+(confint(model, level=.95)[2,2] - confint(model, level=.95)[2,1] )/2
 ```
 
 ```{r}
@@ -80,16 +80,18 @@ predict(model, newdata = data.frame(waiting = 72), interval = "prediction", leve
 
 ```{r}
 # 13
-
+# Fail to reject H_0
 ```
 
 ```{r}
 # 14
+# P-value def
 ```
 
 
 ```{r}
 # 15
+# Standard error, estimate
 ```
 
 
