@@ -24,7 +24,7 @@ This is an **individual** project. This is NOT like a homework assignment. This 
 
 - Your project must be submitted through Coursera. You are required to upload one `.zip` file, named `yourNetID-sim-proj.zip`, which contains:
   + Your RMarkdown file which should be saved as `yourNetID-sim-proj.Rmd`.
-  + The result of knitting your RMarkdown file as `yourNetID-sim-proj.html`.
+  + `The result of knitting your RMarkdown file as `yourNetID-sim-proj.html`.
   + Any outside data provided as a `.csv` file. (In this case, `study_1.csv` and `study_2.csv`.)
 - Your `.Rmd` file should be written such that, when stored in a folder with any data you are asked to import, it will knit properly without modification. If your `.zip` file is organized properly, this should not be an issue.
 - Include your name and NetID in the final document, not only in your filenames.
@@ -55,7 +55,7 @@ The **discussion** section should contain discussion of your results. The discus
 - At the beginning of *each* of the three simulation studies, set a seed equal to your birthday, as is done on homework. (It should be the first code run for each study.) These should be the only three times you set a seed.
 
 ```{r}
-birthday = 18760613
+birthday = 19891210
 set.seed(birthday)
 ```
 
@@ -118,6 +118,362 @@ Additional things to consider:
 - Organize the plots in a grid for easy comparison.
 
 
+### Introduction
+
+$$H_0 : \beta_1 = \beta_2 = \beta_3 = 0 \text{ vs } H_1: \text{not } H_0$$
+
+### Methods
+```{r}
+library(readr)
+data_study_1 = read_csv("study_1.csv")
+df = data.frame(y = data_study_1$y,
+                x1 = data_study_1$x1,
+                x2 = data_study_1$x2,
+                x3 = data_study_1$x3)
+```
+
+```{r}
+# Significant model
+s_beta_0 = 3
+s_beta_1 = 1
+s_beta_2 = 1
+s_beta_3 = 1
+
+# Non-significant model
+ns_beta_0 = 3
+ns_beta_1 = 0
+ns_beta_2 = 0
+ns_beta_3 = 0
+
+# Sample size and noise
+n = 25
+sigma = c(1, 5, 10)
+```
+
+```{r}
+sim_slr = function(df, beta_0, beta_1, beta_2, beta_3, sigma) {
+  epsilon = rnorm(n, mean = 0, sd = sigma)
+  df$y = beta_0 + beta_1*df$x1 + beta_2*df$x2 + beta_3*df$x3 + epsilon
+  df
+}
+```
+
+
+
+```{r}
+library(broom)
+
+# 1 
+# Significant model, sigma: 1
+pvals_sig1_s = rep(0, n)
+fstats_sig1_s = rep(0, n)
+rsquares_sig1_s = rep(0, n)
+beta_hat_0_sig1_s = rep(0, n)
+beta_hat_1_sig1_s = rep(0, n)
+beta_hat_2_sig1_s = rep(0, n)
+beta_hat_3_sig1_s = rep(0, n)
+
+for (i in 1:2000) {
+  sim_data = sim_slr(df, s_beta_0, s_beta_1, s_beta_2, s_beta_3, sigma=sigma[1])
+  model_sig1_s = lm(y~., data=sim_data)
+  sim_data  
+  fstats_sig1_s[i] = summary(model_sig1_s)$fstatistic[1]
+  pvals_sig1_s[i] = glance(model_sig1_s)$p.value
+  rsquares_sig1_s[i] = summary(model_sig1_s)$r.squared
+  beta_hat_0_sig1_s[i] = summary(model_sig1_s)$coefficients["(Intercept)","Estimate"]
+  beta_hat_1_sig1_s[i] = summary(model_sig1_s)$coefficients["x1","Estimate"]
+  beta_hat_2_sig1_s[i] = summary(model_sig1_s)$coefficients["x2","Estimate"]
+  beta_hat_3_sig1_s[i] = summary(model_sig1_s)$coefficients["x3","Estimate"]
+}
+
+# 2
+pvals_sig5_s = rep(0, n)
+fstats_sig5_s = rep(0, n)
+rsquares_sig5_s = rep(0, n)
+beta_hat_0_sig5_s = rep(0, n)
+beta_hat_1_sig5_s = rep(0, n)
+beta_hat_2_sig5_s = rep(0, n)
+beta_hat_3_sig5_s = rep(0, n)
+
+for (i in 1:2000) {
+  sim_data = sim_slr(df, s_beta_0, s_beta_1, s_beta_2, s_beta_3, sigma=sigma[2])
+  model_sig5_s = lm(y~., data=sim_data)
+    
+  fstats_sig5_s[i] = summary(model_sig5_s)$fstatistic[1]
+  pvals_sig5_s[i] = glance(model_sig5_s)$p.value
+  rsquares_sig5_s[i] = summary(model_sig5_s)$r.squared
+  beta_hat_0_sig5_s[i] = summary(model_sig5_s)$coefficients["(Intercept)","Estimate"]
+  beta_hat_1_sig5_s[i] = summary(model_sig5_s)$coefficients["x1","Estimate"]
+  beta_hat_2_sig5_s[i] = summary(model_sig5_s)$coefficients["x2","Estimate"]
+  beta_hat_3_sig5_s[i] = summary(model_sig5_s)$coefficients["x3","Estimate"]
+}
+
+# 3
+pvals_sig10_s = rep(0, n)
+fstats_sig10_s = rep(0, n)
+rsquares_sig10_s = rep(0, n)
+beta_hat_0_sig10_s = rep(0, n)
+beta_hat_1_sig10_s = rep(0, n)
+beta_hat_2_sig10_s = rep(0, n)
+beta_hat_3_sig10_s = rep(0, n)
+
+for (i in 1:2000) {
+  sim_data = sim_slr(df, s_beta_0, s_beta_1, s_beta_2, s_beta_3, sigma=sigma[3])
+  model_sig10_s = lm(y~., data=sim_data)
+    
+  fstats_sig10_s[i] = summary(model_sig10_s)$fstatistic[1]
+  pvals_sig10_s[i] = glance(model_sig10_s)$p.value
+  rsquares_sig10_s[i] = summary(model_sig10_s)$r.squared
+  beta_hat_0_sig10_s[i] = summary(model_sig10_s)$coefficients["(Intercept)","Estimate"]
+  beta_hat_1_sig10_s[i] = summary(model_sig10_s)$coefficients["x1","Estimate"]
+  beta_hat_2_sig10_s[i] = summary(model_sig10_s)$coefficients["x2","Estimate"]
+  beta_hat_3_sig10_s[i] = summary(model_sig10_s)$coefficients["x3","Estimate"]
+  }
+
+# Non significant model, sigma: 1
+pvals_sig1_ns = rep(0, n)
+fstats_sig1_ns = rep(0, n)
+rsquares_sig1_ns = rep(0, n)
+beta_hat_0_sig1_ns = rep(0, n)
+beta_hat_1_sig1_ns = rep(0, n)
+beta_hat_2_sig1_ns = rep(0, n)
+beta_hat_3_sig1_ns = rep(0, n)
+
+for (i in 1:2000) {
+  sim_data = sim_slr(df, ns_beta_0, ns_beta_1, ns_beta_2, ns_beta_3, sigma=sigma[1])
+  model_sig1_ns = lm(y~., data=sim_data)
+    
+  fstats_sig1_ns[i] = summary(model_sig1_ns)$fstatistic[1]
+  pvals_sig1_ns[i] = glance(model_sig1_ns)$p.value
+  rsquares_sig1_ns[i] = summary(model_sig1_ns)$r.squared
+  beta_hat_0_sig1_ns[i] = summary(model_sig1_ns)$coefficients["(Intercept)","Estimate"]
+  beta_hat_1_sig1_ns[i] = summary(model_sig1_ns)$coefficients["x1","Estimate"]
+  beta_hat_2_sig1_ns[i] = summary(model_sig1_ns)$coefficients["x2","Estimate"]
+  beta_hat_3_sig1_ns[i] = summary(model_sig1_ns)$coefficients["x3","Estimate"]
+}
+
+# 2
+pvals_sig5_ns = rep(0, n)
+fstats_sig5_ns = rep(0, n)
+rsquares_sig5_ns = rep(0, n)
+beta_hat_0_sig5_ns = rep(0, n)
+beta_hat_1_sig5_ns = rep(0, n)
+beta_hat_2_sig5_ns = rep(0, n)
+beta_hat_3_sig5_ns = rep(0, n)
+
+for (i in 1:2000) {
+  sim_data = sim_slr(df, ns_beta_0, ns_beta_1, ns_beta_2, ns_beta_3, sigma=sigma[2])
+  model_sig5_ns = lm(y~., data=sim_data)
+    
+  fstats_sig5_ns[i] = summary(model_sig5_ns)$fstatistic[1]
+  pvals_sig5_ns[i] = glance(model_sig5_ns)$p.value
+  rsquares_sig5_ns[i] = summary(model_sig5_ns)$r.squared
+  beta_hat_0_sig5_ns[i] = summary(model_sig5_ns)$coefficients["(Intercept)","Estimate"]
+  beta_hat_1_sig5_ns[i] = summary(model_sig5_ns)$coefficients["x1","Estimate"]
+  beta_hat_2_sig5_ns[i] = summary(model_sig5_ns)$coefficients["x2","Estimate"]
+  beta_hat_3_sig5_ns[i] = summary(model_sig5_ns)$coefficients["x3","Estimate"]
+}
+
+# 3
+pvals_sig10_ns = rep(0, n)
+fstats_sig10_ns = rep(0, n)
+rsquares_sig10_ns = rep(0, n)
+beta_hat_0_sig10_ns = rep(0, n)
+beta_hat_1_sig10_ns = rep(0, n)
+beta_hat_2_sig10_ns = rep(0, n)
+beta_hat_3_sig10_ns = rep(0, n)
+
+for (i in 1:2000) {
+  sim_data = sim_slr(df, ns_beta_0, ns_beta_1, ns_beta_2, ns_beta_3, sigma=sigma[3])
+  model_sig10_ns = lm(y~., data=sim_data)
+    
+  fstats_sig10_ns[i] = summary(model_sig10_ns)$fstatistic[1]
+  pvals_sig10_ns[i] = glance(model_sig10_ns)$p.value
+  rsquares_sig10_ns[i] = summary(model_sig10_ns)$r.squared
+  beta_hat_0_sig10_ns[i] = summary(model_sig10_ns)$coefficients["(Intercept)","Estimate"]
+  beta_hat_1_sig10_ns[i] = summary(model_sig10_ns)$coefficients["x1","Estimate"]
+  beta_hat_2_sig10_ns[i] = summary(model_sig10_ns)$coefficients["x2","Estimate"]
+  beta_hat_3_sig10_ns[i] = summary(model_sig10_ns)$coefficients["x3","Estimate"]
+  }
+
+```
+
+
+```{r}
+par(mfrow = c(3,2))
+hist(beta_hat_0_sig1_s  , prob = TRUE, breaks = 20, border='dodgerblue', xlab = expression(hat(beta[0])))
+curve(dnorm(x, mean = s_beta_0, sd = summary(model_sig1_s)$coefficients['(Intercept)', 2]),
+      col = "darkorange", add = TRUE, lwd = 3)
+
+hist(beta_hat_0_sig5_s  , prob = TRUE, breaks = 20, border='dodgerblue', xlab = expression(hat(beta[0])))
+curve(dnorm(x, mean = s_beta_0, sd = summary(model_sig5_s)$coefficients['(Intercept)', 2]),
+      col = "darkorange", add = TRUE, lwd = 3)
+
+hist(beta_hat_0_sig10_s , prob = TRUE, breaks = 20, border='dodgerblue', xlab = expression(hat(beta[0])))
+curve(dnorm(x, mean = s_beta_0, sd = summary(model_sig10_s)$coefficients['(Intercept)', 2]),
+      col = "darkorange", add = TRUE, lwd = 3)
+
+hist(beta_hat_0_sig1_ns , prob = TRUE, breaks = 20, border='dodgerblue', xlab = expression(hat(beta[0])))
+curve(dnorm(x, mean = ns_beta_0, sd = summary(model_sig1_ns)$coefficients['(Intercept)', 2]),
+      col = "darkorange", add = TRUE, lwd = 3)
+
+hist(beta_hat_0_sig5_ns , prob = TRUE, breaks = 20, border='dodgerblue', xlab = expression(hat(beta[0])))
+curve(dnorm(x, mean = ns_beta_0, sd = summary(model_sig5_ns)$coefficients['(Intercept)', 2]),
+      col = "darkorange", add = TRUE, lwd = 3)
+
+hist(beta_hat_0_sig10_ns, prob = TRUE, breaks = 20, border='dodgerblue', xlab = expression(hat(beta[0])))
+curve(dnorm(x, mean = ns_beta_0, sd = summary(model_sig10_ns)$coefficients['(Intercept)', 2]),
+      col = "darkorange", add = TRUE, lwd = 3)
+```
+```{r}
+par(mfrow = c(3,2))
+hist(beta_hat_1_sig1_s  , prob = TRUE, breaks = 20, border='dodgerblue', xlab = expression(hat(beta[1])))
+curve(dnorm(x, mean = s_beta_1, sd = summary(model_sig1_s)$coefficients['x1', 2]),
+      col = "darkorange", add = TRUE, lwd = 3)
+
+hist(beta_hat_1_sig5_s  , prob = TRUE, breaks = 20, border='dodgerblue', xlab = expression(hat(beta[1])))
+curve(dnorm(x, mean = s_beta_1, sd = summary(model_sig5_s)$coefficients['x1', 2]),
+      col = "darkorange", add = TRUE, lwd = 3)
+
+hist(beta_hat_1_sig10_s , prob = TRUE, breaks = 20, border='dodgerblue', xlab = expression(hat(beta[1])))
+curve(dnorm(x, mean = s_beta_1, sd = summary(model_sig10_s)$coefficients['x1', 2]),
+      col = "darkorange", add = TRUE, lwd = 3)
+
+hist(beta_hat_1_sig1_ns , prob = TRUE, breaks = 20, border='dodgerblue', xlab = expression(hat(beta[1])))
+curve(dnorm(x, mean = ns_beta_1, sd = summary(model_sig1_ns)$coefficients['x1', 2]),
+      col = "darkorange", add = TRUE, lwd = 3)
+
+hist(beta_hat_1_sig5_ns , prob = TRUE, breaks = 20, border='dodgerblue', xlab = expression(hat(beta[1])))
+curve(dnorm(x, mean = ns_beta_1, sd = summary(model_sig5_ns)$coefficients['x1', 2]),
+      col = "darkorange", add = TRUE, lwd = 3)
+
+hist(beta_hat_1_sig10_ns, prob = TRUE, breaks = 20, border='dodgerblue', xlab = expression(hat(beta[1])))
+curve(dnorm(x, mean = ns_beta_1, sd = summary(model_sig10_ns)$coefficients['x1', 2]),
+      col = "darkorange", add = TRUE, lwd = 3)
+```
+```{r}
+par(mfrow = c(3,2))
+hist(beta_hat_2_sig1_s  , prob = TRUE, breaks = 20, border='dodgerblue', xlab = expression(hat(beta[2])))
+curve(dnorm(x, mean = s_beta_2, sd = summary(model_sig1_s)$coefficients['x2', 2]),
+      col = "darkorange", add = TRUE, lwd = 3)
+
+hist(beta_hat_2_sig5_s  , prob = TRUE, breaks = 20, border='dodgerblue', xlab = expression(hat(beta[2])))
+curve(dnorm(x, mean = s_beta_2, sd = summary(model_sig5_s)$coefficients['x2', 2]),
+      col = "darkorange", add = TRUE, lwd = 3)
+
+hist(beta_hat_2_sig10_s , prob = TRUE, breaks = 20, border='dodgerblue', xlab = expression(hat(beta[2])))
+curve(dnorm(x, mean = s_beta_2, sd = summary(model_sig10_s)$coefficients['x2', 2]),
+      col = "darkorange", add = TRUE, lwd = 3)
+
+hist(beta_hat_2_sig1_ns , prob = TRUE, breaks = 20, border='dodgerblue', xlab = expression(hat(beta[2])))
+curve(dnorm(x, mean = ns_beta_2, sd = summary(model_sig1_ns)$coefficients['x2', 2]),
+      col = "darkorange", add = TRUE, lwd = 3)
+
+hist(beta_hat_2_sig5_ns , prob = TRUE, breaks = 20, border='dodgerblue', xlab = expression(hat(beta[2])))
+curve(dnorm(x, mean = ns_beta_2, sd = summary(model_sig5_ns)$coefficients['x2', 2]),
+      col = "darkorange", add = TRUE, lwd = 3)
+
+hist(beta_hat_2_sig10_ns, prob = TRUE, breaks = 20, border='dodgerblue', xlab = expression(hat(beta[2])))
+curve(dnorm(x, mean = ns_beta_2, sd = summary(model_sig10_ns)$coefficients['x2', 2]),
+      col = "darkorange", add = TRUE, lwd = 3)
+```
+```{r}
+par(mfrow = c(3,2))
+hist(beta_hat_3_sig1_s  , prob = TRUE, breaks = 20, border='dodgerblue', xlab = expression(hat(beta[3])))
+curve(dnorm(x, mean = s_beta_3, sd = summary(model_sig1_s)$coefficients['x3', 2]),
+      col = "darkorange", add = TRUE, lwd = 3)
+
+hist(beta_hat_3_sig5_s  , prob = TRUE, breaks = 20, border='dodgerblue', xlab = expression(hat(beta[3])))
+curve(dnorm(x, mean = s_beta_3, sd = summary(model_sig5_s)$coefficients['x3', 2]),
+      col = "darkorange", add = TRUE, lwd = 3)
+
+hist(beta_hat_3_sig10_s , prob = TRUE, breaks = 20, border='dodgerblue', xlab = expression(hat(beta[3])))
+curve(dnorm(x, mean = s_beta_3, sd = summary(model_sig10_s)$coefficients['x3', 2]),
+      col = "darkorange", add = TRUE, lwd = 3)
+
+hist(beta_hat_3_sig1_ns , prob = TRUE, breaks = 20, border='dodgerblue', xlab = expression(hat(beta[3])))
+curve(dnorm(x, mean = ns_beta_3, sd = summary(model_sig1_ns)$coefficients['x3', 2]),
+      col = "darkorange", add = TRUE, lwd = 3)
+
+hist(beta_hat_3_sig5_ns , prob = TRUE, breaks = 20, border='dodgerblue', xlab = expression(hat(beta[3])))
+curve(dnorm(x, mean = ns_beta_3, sd = summary(model_sig5_ns)$coefficients['x3', 2]),
+      col = "darkorange", add = TRUE, lwd = 3)
+
+hist(beta_hat_3_sig10_ns, prob = TRUE, breaks = 20, border='dodgerblue', xlab = expression(hat(beta[3])))
+curve(dnorm(x, mean = ns_beta_3, sd = summary(model_sig10_ns)$coefficients['x3', 2]),
+      col = "darkorange", add = TRUE, lwd = 3)
+```
+
+```{r}
+library(knitr)
+
+df = data.frame(sig1_s = c(mean(pvals_sig1_s < 0.01),
+                            mean(pvals_sig1_s < 0.05),
+                            mean(pvals_sig1_s < 0.10)),
+                sig1_ns = c(mean(pvals_sig1_ns < 0.01),
+                            mean(pvals_sig1_ns < 0.05),
+                            mean(pvals_sig1_ns < 0.10)),
+                sig5_s = c(mean(pvals_sig5_s < 0.01),
+                            mean(pvals_sig5_s < 0.05),
+                            mean(pvals_sig5_s < 0.10)),
+                sig5_ns = c(mean(pvals_sig5_ns < 0.01),
+                            mean(pvals_sig5_ns < 0.05),
+                            mean(pvals_sig5_ns < 0.10)),
+                sig10_s = c(mean(pvals_sig10_s < 0.01),
+                            mean(pvals_sig10_s < 0.05),
+                            mean(pvals_sig10_s < 0.10)),
+                sig10_ns = c(mean(pvals_sig10_ns < 0.01),
+                            mean(pvals_sig10_ns < 0.05),
+                            mean(pvals_sig10_ns < 0.10)))
+
+kable(t(df), col.names = c('0.01','0.05','0.10'))
+```
+```{r}
+df = data.frame(sig1_s = c(mean(fstats_sig1_s < 0.01),
+                            mean(fstats_sig1_s < 0.05),
+                            mean(fstats_sig1_s < 0.10)),
+                sig1_ns = c(mean(fstats_sig1_ns < 0.01),
+                            mean(fstats_sig1_ns < 0.05),
+                            mean(fstats_sig1_ns < 0.10)),
+                sig5_s = c(mean(fstats_sig5_s < 0.01),
+                            mean(fstats_sig5_s < 0.05),
+                            mean(fstats_sig5_s < 0.10)),
+                sig5_ns = c(mean(fstats_sig5_ns < 0.01),
+                            mean(fstats_sig5_ns < 0.05),
+                            mean(fstats_sig5_ns < 0.10)),
+                sig10_s = c(mean(fstats_sig10_s < 0.01),
+                            mean(fstats_sig10_s < 0.05),
+                            mean(fstats_sig10_s < 0.10)),
+                sig10_ns = c(mean(fstats_sig10_ns < 0.01),
+                            mean(fstats_sig10_ns < 0.05),
+                            mean(fstats_sig10_ns < 0.10)))
+
+kable(t(df), col.names = c('0.01','0.05','0.10'))
+```
+
+```{r}
+df = data.frame(sig1 = c(summary(model_sig1_s)$r.squared, summary(model_sig1_ns)$r.squared),
+                sig5 = c(summary(model_sig5_s)$r.squared, summary(model_sig5_ns)$r.squared),
+                sig10 = c(summary(model_sig10_s)$r.squared, summary(model_sig10_ns)$r.squared))
+
+kable(t(df), col.names = c("Significant", "Non significant"))
+
+```
+
+
+### Results
+There are only `r` proportion whose beta_3_pval is less than 0.1. Considering my expected p-value is `r` where $\beta_3=0$ and $\alpha = 0.1$, it is easy to expect that only few of the beta_3_pval would be less than 0.1. Therefore, this result matches with what I have expected as in null hypothesis.  
+
+### Discussion
+
+
+
+
+```{r}
+birthday = 19891210
+set.seed(birthday)
+```
+
 # Simulation Study 2: Using RMSE for Selection?
 
 In homework we saw how Test RMSE can be used to select the “best” model. In this simulation study we will investigate how well this procedure works. Since splitting the data is random, we don’t expect it to work correctly each time. We could get unlucky. But averaged over many attempts, we should expect it to select the appropriate model.
@@ -174,6 +530,10 @@ Potential discussions:
 - Does the method **always** select the correct model? On average, does is select the correct model?
 - How does the level of noise affect the results?
 
+```{r}
+birthday = 19891210
+set.seed(birthday)
+```
 
 # Simulation Study 3: Power (Graduate Students only)
 
