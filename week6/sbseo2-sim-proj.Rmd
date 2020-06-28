@@ -535,6 +535,242 @@ birthday = 19891210
 set.seed(birthday)
 ```
 
+```{r}
+beta_0 = 0
+beta_1 = 3
+beta_2 = -4
+beta_3 = 1.6
+beta_4 = -1.1
+beta_5 = 0.7
+beta_6 = 0.5
+n = 500
+sigma = c(1,2,4)
+```
+
+```{r}
+study2_data = read_csv("study_2.csv")
+```
+```{r}
+RMSE = function(criterion, model){
+  y = study2_data[criterion, ]$y
+  y_hat = predict(model, newdata=data.frame(x1=study2_data[criterion, ]$x1,
+                                            x2=study2_data[criterion, ]$x2,
+                                            x3=study2_data[criterion, ]$x3,
+                                            x4=study2_data[criterion, ]$x4,
+                                            x5=study2_data[criterion, ]$x5,
+                                            x6=study2_data[criterion, ]$x6,
+                                            x7=study2_data[criterion, ]$x7,
+                                            x8=study2_data[criterion, ]$x8,
+                                            x9=study2_data[criterion, ]$x9))
+  sqrt(sum((y - y_hat)^2) / length(y))
+}
+```
+
+```{r}
+trn_ml1 = rep(0, 1000)
+tst_ml1 = rep(0, 1000)
+trn_ml2 = rep(0, 1000)
+tst_ml2 = rep(0, 1000)
+trn_ml3 = rep(0, 1000)
+tst_ml3 = rep(0, 1000)
+trn_ml4 = rep(0, 1000)
+tst_ml4 = rep(0, 1000)
+trn_ml5 = rep(0, 1000)
+tst_ml5 = rep(0, 1000)
+trn_ml6 = rep(0, 1000)
+tst_ml6 = rep(0, 1000)
+trn_ml7 = rep(0, 1000)
+tst_ml7 = rep(0, 1000)
+trn_ml8 = rep(0, 1000)
+tst_ml8 = rep(0, 1000)
+trn_ml9 = rep(0, 1000)
+tst_ml9 = rep(0, 1000)
+
+for (i in 1:1000){
+  trn_idx = sample(1:nrow(study2_data), 250)
+  trn_data = study2_data[trn_idx,]
+  val_data = study2_data[-trn_idx,]
+  val_idx = seq(1:500)[-trn_idx]
+  
+  epsilon = rnorm(n/2, 0, 1)
+  trn_data$y = beta_0 + beta_1*trn_data$x1+ beta_2*trn_data$x2 + beta_3*trn_data$x3 + beta_4*trn_data$x4 + beta_5*trn_data$x5 + beta_6*trn_data$x6 + epsilon
+  
+  model1 = lm(y ~ x1, data=trn_data)
+  model2 = lm(y ~ x1+x2, data=trn_data)
+  model3 = lm(y ~ x1+x2+x3, data=trn_data)
+  model4 = lm(y ~ x1+x2+x3+x4, data=trn_data)
+  model5 = lm(y ~ x1+x2+x3+x4+x5, data=trn_data)
+  model6 = lm(y ~ x1+x2+x3+x4+x5+x6, data=trn_data)
+  model7 = lm(y ~ x1+x2+x3+x4+x5+x6+x7, data=trn_data)
+  model8 = lm(y ~ x1+x2+x3+x4+x5+x6+x7+x8, data=trn_data)
+  model9 = lm(y ~ x1+x2+x3+x4+x5+x6+x7+x8+x9, data=trn_data)
+  
+  # Model1
+  trn_ml1[i] = RMSE(trn_idx, model1)
+  tst_ml1[i] = RMSE(val_idx, model1)
+  #Model2
+  trn_ml2[i] = RMSE(trn_idx, model2)
+  tst_ml2[i] = RMSE(val_idx, model2)
+  #Model3
+  trn_ml3[i] = RMSE(trn_idx, model3)
+  tst_ml3[i] = RMSE(val_idx, model3)
+  #Model4
+  trn_ml4[i] = RMSE(trn_idx, model4)
+  tst_ml4[i] = RMSE(val_idx, model4)
+  #Model5
+  trn_ml5[i] = RMSE(trn_idx, model5)
+  tst_ml5[i] = RMSE(val_idx, model5)
+  #Model6
+  trn_ml6[i] = RMSE(trn_idx, model6)
+  tst_ml6[i] = RMSE(val_idx, model6)
+  #Model7
+  trn_ml7[i] = RMSE(trn_idx, model7)
+  tst_ml7[i] = RMSE(val_idx, model7)
+  #Model8
+  trn_ml8[i] = RMSE(trn_idx, model8)
+  tst_ml8[i] = RMSE(val_idx, model8)
+  #Model9
+  trn_ml9[i] = RMSE(trn_idx, model9)
+  tst_ml9[i] = RMSE(val_idx, model9)
+}
+for (i in 1001:2000){
+  trn_idx = sample(1:nrow(study2_data), 250)
+  trn_data = study2_data[trn_idx,]
+  val_data = study2_data[-trn_idx,]
+  val_idx = seq(1:500)[-trn_idx]
+  
+  epsilon = rnorm(n/2, 0, 3)
+  trn_data$y = beta_0 + beta_1*trn_data$x1+ beta_2*trn_data$x2 + beta_3*trn_data$x3 + beta_4*trn_data$x4 + beta_5*trn_data$x5 + beta_6*trn_data$x6 + epsilon
+  
+  model1 = lm(y ~ x1, data=trn_data)
+  model2 = lm(y ~ x1+x2, data=trn_data)
+  model3 = lm(y ~ x1+x2+x3, data=trn_data)
+  model4 = lm(y ~ x1+x2+x3+x4, data=trn_data)
+  model5 = lm(y ~ x1+x2+x3+x4+x5, data=trn_data)
+  model6 = lm(y ~ x1+x2+x3+x4+x5+x6, data=trn_data)
+  model7 = lm(y ~ x1+x2+x3+x4+x5+x6+x7, data=trn_data)
+  model8 = lm(y ~ x1+x2+x3+x4+x5+x6+x7+x8, data=trn_data)
+  model9 = lm(y ~ x1+x2+x3+x4+x5+x6+x7+x8+x9, data=trn_data)
+  
+  # Model1
+  trn_ml1[i] = RMSE(trn_idx, model1)
+  tst_ml1[i] = RMSE(val_idx, model1)
+  #Model2
+  trn_ml2[i] = RMSE(trn_idx, model2)
+  tst_ml2[i] = RMSE(val_idx, model2)
+  #Model3
+  trn_ml3[i] = RMSE(trn_idx, model3)
+  tst_ml3[i] = RMSE(val_idx, model3)
+  #Model4
+  trn_ml4[i] = RMSE(trn_idx, model4)
+  tst_ml4[i] = RMSE(val_idx, model4)
+  #Model5
+  trn_ml5[i] = RMSE(trn_idx, model5)
+  tst_ml5[i] = RMSE(val_idx, model5)
+  #Model6
+  trn_ml6[i] = RMSE(trn_idx, model6)
+  tst_ml6[i] = RMSE(val_idx, model6)
+  #Model7
+  trn_ml7[i] = RMSE(trn_idx, model7)
+  tst_ml7[i] = RMSE(val_idx, model7)
+  #Model8
+  trn_ml8[i] = RMSE(trn_idx, model8)
+  tst_ml8[i] = RMSE(val_idx, model8)
+  #Model9
+  trn_ml9[i] = RMSE(trn_idx, model9)
+  tst_ml9[i] = RMSE(val_idx, model9)
+}
+for (i in 2001:3000){
+  trn_idx = sample(1:nrow(study2_data), 250)
+  trn_data = study2_data[trn_idx,]
+  val_data = study2_data[-trn_idx,]
+  val_idx = seq(1:500)[-trn_idx]
+  
+  epsilon = rnorm(n/2, 0, 5)
+  trn_data$y = beta_0 + beta_1*trn_data$x1+ beta_2*trn_data$x2 + beta_3*trn_data$x3 + beta_4*trn_data$x4 + beta_5*trn_data$x5 + beta_6*trn_data$x6 + epsilon
+  
+  model1 = lm(y ~ x1, data=trn_data)
+  model2 = lm(y ~ x1+x2, data=trn_data)
+  model3 = lm(y ~ x1+x2+x3, data=trn_data)
+  model4 = lm(y ~ x1+x2+x3+x4, data=trn_data)
+  model5 = lm(y ~ x1+x2+x3+x4+x5, data=trn_data)
+  model6 = lm(y ~ x1+x2+x3+x4+x5+x6, data=trn_data)
+  model7 = lm(y ~ x1+x2+x3+x4+x5+x6+x7, data=trn_data)
+  model8 = lm(y ~ x1+x2+x3+x4+x5+x6+x7+x8, data=trn_data)
+  model9 = lm(y ~ x1+x2+x3+x4+x5+x6+x7+x8+x9, data=trn_data)
+  
+  # Model1
+  trn_ml1[i] = RMSE(trn_idx, model1)
+  tst_ml1[i] = RMSE(val_idx, model1)
+  #Model2
+  trn_ml2[i] = RMSE(trn_idx, model2)
+  tst_ml2[i] = RMSE(val_idx, model2)
+  #Model3
+  trn_ml3[i] = RMSE(trn_idx, model3)
+  tst_ml3[i] = RMSE(val_idx, model3)
+  #Model4
+  trn_ml4[i] = RMSE(trn_idx, model4)
+  tst_ml4[i] = RMSE(val_idx, model4)
+  #Model5
+  trn_ml5[i] = RMSE(trn_idx, model5)
+  tst_ml5[i] = RMSE(val_idx, model5)
+  #Model6
+  trn_ml6[i] = RMSE(trn_idx, model6)
+  tst_ml6[i] = RMSE(val_idx, model6)
+  #Model7
+  trn_ml7[i] = RMSE(trn_idx, model7)
+  tst_ml7[i] = RMSE(val_idx, model7)
+  #Model8
+  trn_ml8[i] = RMSE(trn_idx, model8)
+  tst_ml8[i] = RMSE(val_idx, model8)
+  #Model9
+  trn_ml9[i] = RMSE(trn_idx, model9)
+  tst_ml9[i] = RMSE(val_idx, model9)
+}
+```
+
+
+```{r}
+df = data.frame(Model1 = c(mean(trn_ml1[1:1000]), mean(tst_ml1[1:1000])),
+                Model2 = c(mean(trn_ml2[1:1000]), mean(tst_ml2[1:1000])),
+                Model3 = c(mean(trn_ml3[1:1000]), mean(tst_ml3[1:1000])),
+                Model4 = c(mean(trn_ml4[1:1000]), mean(tst_ml4[1:1000])),
+                Model5 = c(mean(trn_ml5[1:1000]), mean(tst_ml5[1:1000])),
+                Model6 = c(mean(trn_ml6[1:1000]), mean(tst_ml6[1:1000])),
+                Model7 = c(mean(trn_ml7[1:1000]), mean(tst_ml7[1:1000])),
+                Model8 = c(mean(trn_ml8[1:1000]), mean(tst_ml8[1:1000])),
+                Model9 = c(mean(trn_ml9[1:1000]), mean(tst_ml9[1:1000])))
+
+kable(t(df), col.names = c("Training", "Testing"))
+```
+```{r}
+df = data.frame(Model1 = c(mean(trn_ml1[1001:2000]), mean(tst_ml1[1001:2000])),
+                Model2 = c(mean(trn_ml2[1001:2000]), mean(tst_ml2[1001:2000])),
+                Model3 = c(mean(trn_ml3[1001:2000]), mean(tst_ml3[1001:2000])),
+                Model4 = c(mean(trn_ml4[1001:2000]), mean(tst_ml4[1001:2000])),
+                Model5 = c(mean(trn_ml5[1001:2000]), mean(tst_ml5[1001:2000])),
+                Model6 = c(mean(trn_ml6[1001:2000]), mean(tst_ml6[1001:2000])),
+                Model7 = c(mean(trn_ml7[1001:2000]), mean(tst_ml7[1001:2000])),
+                Model8 = c(mean(trn_ml8[1001:2000]), mean(tst_ml8[1001:2000])),
+                Model9 = c(mean(trn_ml9[1001:2000]), mean(tst_ml9[1001:2000])))
+
+kable(t(df), col.names = c("Training", "Testing"))
+```
+```{r}
+df = data.frame(Model1 = c(mean(trn_ml1[2001:3000]), mean(tst_ml1[2001:3000])),
+                Model2 = c(mean(trn_ml2[2001:3000]), mean(tst_ml2[2001:3000])),
+                Model3 = c(mean(trn_ml3[2001:3000]), mean(tst_ml3[2001:3000])),
+                Model4 = c(mean(trn_ml4[2001:3000]), mean(tst_ml4[2001:3000])),
+                Model5 = c(mean(trn_ml5[2001:3000]), mean(tst_ml5[2001:3000])),
+                Model6 = c(mean(trn_ml6[2001:3000]), mean(tst_ml6[2001:3000])),
+                Model7 = c(mean(trn_ml7[2001:3000]), mean(tst_ml7[2001:3000])),
+                Model8 = c(mean(trn_ml8[2001:3000]), mean(tst_ml8[2001:3000])),
+                Model9 = c(mean(trn_ml9[2001:3000]), mean(tst_ml9[2001:3000])))
+
+kable(t(df), col.names = c("Training", "Testing"))
+```
+
+
 # Simulation Study 3: Power (Graduate Students only)
 
 In this simulation study we will investigate the **power** of the significance of regression test for simple linear regression. 
