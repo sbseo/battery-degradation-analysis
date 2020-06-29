@@ -638,9 +638,6 @@ for (i in 1:1000){
 }
 
 ```
-```{r}
-
-```
 
 ```{r}
 for (i in 1001:2000){
@@ -752,8 +749,18 @@ df = data.frame(Model1 = c(mean(trn_ml1[1:1000]), mean(tst_ml1[1:1000])),
                 Model9 = c(mean(trn_ml9[1:1000]), mean(tst_ml9[1:1000])))
 
 
-plot(seq(1:9), c(df$Model1[1],df$Model2[1],df$Model3[1],df$Model4[1],df$Model5[1],df$Model6[1],df$Model7[1],df$Model8[1],df$Model9[1]))
 kable(t(df), col.names = c("Training", "Testing"))
+bplot = barplot(
+  matrix(c(df$Model1, df$Model2, df$Model3, df$Model4, df$Model5, df$Model6, df$Model7, df$Model8, df$Model9), nrow = 2, ncol = 9),
+  beside = TRUE,
+  xlab='Model variations',
+  names.arg=c(seq(1:9)),
+  ylab='RSME',
+  legend.text = c('train data', 'test data'),
+  main="RSME where sigma = 1",
+  col=c("lightblue","orange")
+)
+
 ```
 ```{r}
 df = data.frame(Model1 = c(mean(trn_ml1[1001:2000]), mean(tst_ml1[1001:2000])),
@@ -767,6 +774,16 @@ df = data.frame(Model1 = c(mean(trn_ml1[1001:2000]), mean(tst_ml1[1001:2000])),
                 Model9 = c(mean(trn_ml9[1001:2000]), mean(tst_ml9[1001:2000])))
 
 kable(t(df), col.names = c("Training", "Testing"))
+barplot(
+  matrix(c(df$Model1, df$Model2, df$Model3, df$Model4, df$Model5, df$Model6, df$Model7, df$Model8, df$Model9), nrow = 2, ncol = 9),
+  beside = TRUE,
+  xlab='Model variations',
+  names.arg=c(seq(1:9)),
+  ylab='RSME',
+  legend.text = c('train data', 'test data'),
+  main="RSME where sigma = 3",
+  col=c("lightblue","orange")
+)
 ```
 ```{r}
 df = data.frame(Model1 = c(mean(trn_ml1[2001:3000]), mean(tst_ml1[2001:3000])),
@@ -780,6 +797,16 @@ df = data.frame(Model1 = c(mean(trn_ml1[2001:3000]), mean(tst_ml1[2001:3000])),
                 Model9 = c(mean(trn_ml9[2001:3000]), mean(tst_ml9[2001:3000])))
 
 kable(t(df), col.names = c("Training", "Testing"))
+barplot(
+  matrix(c(df$Model1, df$Model2, df$Model3, df$Model4, df$Model5, df$Model6, df$Model7, df$Model8, df$Model9), nrow = 2, ncol = 9),
+  beside = TRUE,
+  xlab='Model variations',
+  names.arg=c(seq(1:9)),
+  ylab='RSME',
+  legend.text = c('train data', 'test data'),
+  main="RSME where sigma = 5",
+  col=c("lightblue","orange")
+)
 ```
 
 
@@ -836,7 +863,7 @@ We will hold the significance level constant at $\alpha = 0.05$.
 
 Use the following code to generate the predictor values, `x`: values for different sample sizes.
 
-```{r eval=FALSE}
+```{r}
 x_values = seq(0, 5, length = n)
 ```
 
@@ -854,3 +881,167 @@ Potential discussions:
 
 - How do $n$, $\beta_1$, and $\sigma$ affect power? Consider additional plots to demonstrate these effects.
 - Are $1000$ simulations sufficient?
+
+```{r}
+library(broom)
+n = 10
+beta_1 = seq(-2,2,.1)
+pvals_n10_s1 = rep(rep(0, length(beta_1)), 1000)
+pvals_n10_s2 = rep(rep(0, length(beta_1)), 1000)
+pvals_n10_s4 = rep(rep(0, length(beta_1)), 1000)
+pvals_n20_s1 = rep(rep(0, length(beta_1)), 1000)
+pvals_n20_s2 = rep(rep(0, length(beta_1)), 1000)
+pvals_n20_s4 = rep(rep(0, length(beta_1)), 1000)
+pvals_n30_s1 = rep(rep(0, length(beta_1)), 1000)
+pvals_n30_s2 = rep(rep(0, length(beta_1)), 1000)
+pvals_n30_s4 = rep(rep(0, length(beta_1)), 1000)
+```
+
+
+```{r}
+# n10 s1
+  for (j in 1:1000){
+    for (i in 1:length(beta_1)){
+      x_values = seq(0, 5, length = n)
+      df = data.frame(y = 0, x = x_values)
+      epsilon = rnorm(n, mean = 0, sd = 1)
+      df$y = beta_1[i]*df$x + epsilon
+    
+      model = lm(y~x, data=df)
+      pvals_n10_s1[(j-1)*41+i] = glance(model)$p.value
+    }
+  }
+
+# n10 s2
+  for (j in 1:1000){
+    for (i in 1:length(beta_1)){
+      x_values = seq(0, 5, length = n)
+      df = data.frame(y = 0, x = x_values)
+      epsilon = rnorm(n, mean = 0, sd = 2)
+      df$y = beta_1[i]*df$x + epsilon
+    
+      model = lm(y~x, data=df)
+      pvals_n10_s2[(j-1)*41+i] = glance(model)$p.value
+    }
+  }
+
+# n10 s3
+  for (j in 1:1000){
+    for (i in 1:length(beta_1)){
+      x_values = seq(0, 5, length = n)
+      df = data.frame(y = 0, x = x_values)
+      epsilon = rnorm(n, mean = 0, sd = 4)
+      df$y = beta_1[i]*df$x + epsilon
+    
+      model = lm(y~x, data=df)
+      pvals_n10_s4[(j-1)*41+i] = glance(model)$p.value
+    }
+  }
+```
+
+
+
+
+```{r}
+# n20 s1
+  for (j in 1:1000){
+    for (i in 1:length(beta_1)){
+      x_values = seq(0, 5, length = n)
+      df = data.frame(y = 0, x = x_values)
+      epsilon = rnorm(n, mean = 0, sd = 1)
+      df$y = beta_1[i]*df$x + epsilon
+    
+      model = lm(y~x, data=df)
+      pvals_n20_s1[(j-1)*41+i] = glance(model)$p.value
+    }
+  }
+
+# n20 s2
+  for (j in 1:1000){
+    for (i in 1:length(beta_1)){
+      x_values = seq(0, 5, length = n)
+      df = data.frame(y = 0, x = x_values)
+      epsilon = rnorm(n, mean = 0, sd = 2)
+      df$y = beta_1[i]*df$x + epsilon
+    
+      model = lm(y~x, data=df)
+      pvals_n20_s2[(j-1)*41+i] = glance(model)$p.value
+    }
+  }
+
+# n20 s4
+  for (j in 1:1000){
+    for (i in 1:length(beta_1)){
+      x_values = seq(0, 5, length = n)
+      df = data.frame(y = 0, x = x_values)
+      epsilon = rnorm(n, mean = 0, sd = 4)
+      df$y = beta_1[i]*df$x + epsilon
+    
+      model = lm(y~x, data=df)
+      pvals_n20_s4[(j-1)*41+i] = glance(model)$p.value
+    }
+  }
+```
+```{r}
+
+```
+
+
+
+
+
+```{r}
+# n30 s1
+  for (j in 1:1000){
+    for (i in 1:length(beta_1)){
+      x_values = seq(0, 5, length = n)
+      df = data.frame(y = 0, x = x_values)
+      epsilon = rnorm(n, mean = 0, sd = 1)
+      df$y = beta_1[i]*df$x + epsilon
+    
+      model = lm(y~x, data=df)
+      pvals_n30_s1[(j-1)*41+i] = glance(model)$p.value
+    }
+  }
+
+# n30 s2
+  for (j in 1:1000){
+    for (i in 1:length(beta_1)){
+      x_values = seq(0, 5, length = n)
+      df = data.frame(y = 0, x = x_values)
+      epsilon = rnorm(n, mean = 0, sd = 2)
+      df$y = beta_1[i]*df$x + epsilon
+    
+      model = lm(y~x, data=df)
+      pvals_n30_s2[(j-1)*41+i] = glance(model)$p.value
+    }
+  }
+
+# n30 s4
+  for (j in 1:1000){
+    for (i in 1:length(beta_1)){
+      x_values = seq(0, 5, length = n)
+      df = data.frame(y = 0, x = x_values)
+      epsilon = rnorm(n, mean = 0, sd = 4)
+      df$y = beta_1[i]*df$x + epsilon
+    
+      model = lm(y~x, data=df)
+      pvals_n30_s4[(j-1)*41+i] = glance(model)$p.value
+    }
+  }
+```
+
+
+
+```{r}
+length(pvals_n10_s1[pvals_n10_s1 < 0.05])
+length(pvals_n10_s2[pvals_n10_s2 < 0.05])
+length(pvals_n10_s4[pvals_n10_s4 < 0.05])
+length(pvals_n20_s1[pvals_n20_s1 < 0.05])
+length(pvals_n20_s2[pvals_n20_s2 < 0.05])
+length(pvals_n30_s4[pvals_n30_s4 < 0.05])
+length(pvals_n10_s1[pvals_n10_s1 < 0.05])
+length(pvals_n20_s2[pvals_n20_s2 < 0.05])
+length(pvals_n30_s4[pvals_n30_s4 < 0.05])
+```
+
