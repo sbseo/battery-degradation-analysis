@@ -120,9 +120,15 @@ Additional things to consider:
 
 ### Introduction
 
-$$H_0 : \beta_1 = \beta_2 = \beta_3 = 0 \text{ vs } H_1: \text{not } H_0$$
+In simulation study 1, we simulate two different models and conduct significance of regression test. At the end of the question, we will visualize the simulation result by plots and tables.
 
 ### Methods
+
+$$H_0 : \beta_1 = \beta_2 = \beta_3 = 0 \text{ vs } H_1: \text{not } H_0$$
+
+Signifance of regression test will be used to perform the simulation. In significance of regression test, null hypothesis assumes all of coefficients are zero, while alternative hypothesis assumes at least one of the coefficients is not zero. For individual parameter test, we can simply analyze p-values of fitted coefficients. To test the entire model given the every existing parameter, F-statistic is an useful measure. We also check $R^2$ while it won't guarantee the optimal result in multiple linear regression model.
+
+
 ```{r}
 library(readr)
 data_study_1 = read_csv("study_1.csv")
@@ -157,7 +163,6 @@ sim_slr = function(df, beta_0, beta_1, beta_2, beta_3, sigma) {
   df
 }
 ```
-
 
 
 ```{r}
@@ -299,7 +304,92 @@ for (i in 1:2000) {
 ```
 
 
-```{r}
+### Results
+
+The table below shows the proportion of `f-statistic` that is less than $\alpha$ when simulated for 2000 times.The column name `0.01`, `0.05`, and `0.10` refers to the $\alpha$. `_s` and `_ns` in row mean significant model and non significant model respectively. `sig1`, `sig5`, and `sig10` mean the $\sigma$ which is used for noise within the model. 
+
+```{r echo=FALSE}
+df = data.frame(sig1_s = c(mean(fstats_sig1_s < 0.01),
+                            mean(fstats_sig1_s < 0.05),
+                            mean(fstats_sig1_s < 0.10)),
+                sig1_ns = c(mean(fstats_sig1_ns < 0.01),
+                            mean(fstats_sig1_ns < 0.05),
+                            mean(fstats_sig1_ns < 0.10)),
+                sig5_s = c(mean(fstats_sig5_s < 0.01),
+                            mean(fstats_sig5_s < 0.05),
+                            mean(fstats_sig5_s < 0.10)),
+                sig5_ns = c(mean(fstats_sig5_ns < 0.01),
+                            mean(fstats_sig5_ns < 0.05),
+                            mean(fstats_sig5_ns < 0.10)),
+                sig10_s = c(mean(fstats_sig10_s < 0.01),
+                            mean(fstats_sig10_s < 0.05),
+                            mean(fstats_sig10_s < 0.10)),
+                sig10_ns = c(mean(fstats_sig10_ns < 0.01),
+                            mean(fstats_sig10_ns < 0.05),
+                            mean(fstats_sig10_ns < 0.10)))
+
+kable(t(df), col.names = c('0.01','0.05','0.10'))
+# sigma 
+```
+
+The table below shows the proportion of `p-values` less than $\alpha$ when simulated for 2000 times.
+
+```{r echo=FALSE}
+df = data.frame(sig1_s = c(mean(pvals_sig1_s < 0.01),
+                            mean(pvals_sig1_s < 0.05),
+                            mean(pvals_sig1_s < 0.10)),
+                sig1_ns = c(mean(pvals_sig1_ns < 0.01),
+                            mean(pvals_sig1_ns < 0.05),
+                            mean(pvals_sig1_ns < 0.10)),
+                sig5_s = c(mean(pvals_sig5_s < 0.01),
+                            mean(pvals_sig5_s < 0.05),
+                            mean(pvals_sig5_s < 0.10)),
+                sig5_ns = c(mean(pvals_sig5_ns < 0.01),
+                            mean(pvals_sig5_ns < 0.05),
+                            mean(pvals_sig5_ns < 0.10)),
+                sig10_s = c(mean(pvals_sig10_s < 0.01),
+                            mean(pvals_sig10_s < 0.05),
+                            mean(pvals_sig10_s < 0.10)),
+                sig10_ns = c(mean(pvals_sig10_ns < 0.01),
+                            mean(pvals_sig10_ns < 0.05),
+                            mean(pvals_sig10_ns < 0.10)))
+
+kable(t(df), col.names = c('0.01','0.05','0.10'))
+```
+
+The table below shows $R^2$ measure obtained from signifcant and non significant model when $\sigma$ is  1, 5, and 10. 
+
+```{r echo=FALSE}
+df = data.frame(sig1 = c(summary(model_sig1_s)$r.squared, summary(model_sig1_ns)$r.squared),
+                sig5 = c(summary(model_sig5_s)$r.squared, summary(model_sig5_ns)$r.squared),
+                sig10 = c(summary(model_sig10_s)$r.squared, summary(model_sig10_ns)$r.squared))
+
+kable(t(df), col.names = c("Significant", "Non significant"))
+
+```
+
+
+
+### Discussion
+
+In f-test, the result shows that `sig1_s` is almost certain to be a significant model. There are almost no proportion less than 0.01, 0.05, and 0.10$\%$. Therefore, null hypothesis is rejected. The overall `f-statistic` increased as $\sigma$ increased. Considering `sig1_s` and `sig10_s` really are signicant model, the result indicates that the larger sigma may cause a larger error rate.
+
+The result of t-test is also similar to f-test. `sig1_s` was tested to be a signifcant model. However, confidence interval was decreased as $\sigma$ has increased.
+
+$R^2$ means the proportion of the regression explained by the model. Therefore, is easy to infer that significant model would have higher measure than non significant model. As expected, the result showed that significant model with lower $\sigma$ obtained larger $R^2$ measure. 
+
+Overall, both significant and non-significant model share the same relationship with $\sigma$, while there are few exceptions when $\sigma$ is a large number. 
+
+
+
+The graphs below show the result of one parameter test for every coefficient. The true distributions of significant model are known as the following. 
+$$\hat{\beta_0} \sim N(\beta_0=`r s_beta_0`, \sigma^2 = `r summary(model_sig5_ns)$coefficients['(Intercept)', 2]`^2)$$
+$$\hat{\beta_1} \sim N(\beta_1=`r s_beta_1`, \sigma^2 = `r summary(model_sig5_ns)$coefficients['x1', 2]`^2)$$
+$$\hat{\beta_2} \sim N(\beta_2=`r s_beta_2`, \sigma^2 = `r summary(model_sig5_ns)$coefficients['x2', 2]`^2)$$
+$$\hat{\beta_3} \sim N(\beta_3=`r s_beta_3`, \sigma^2 = `r summary(model_sig5_ns)$coefficients['x3', 2]`^2)$$
+Likewise, the graphs below show that the empirical distribution truely follows the true distribution.
+
+```{r echo=FALSE} 
 par(mfrow = c(3,2))
 hist(beta_hat_0_sig1_s  , prob = TRUE, breaks = 20, border='dodgerblue', xlab = expression(hat(beta[0])))
 curve(dnorm(x, mean = s_beta_0, sd = summary(model_sig1_s)$coefficients['(Intercept)', 2]),
@@ -325,7 +415,7 @@ hist(beta_hat_0_sig10_ns, prob = TRUE, breaks = 20, border='dodgerblue', xlab = 
 curve(dnorm(x, mean = ns_beta_0, sd = summary(model_sig10_ns)$coefficients['(Intercept)', 2]),
       col = "darkorange", add = TRUE, lwd = 3)
 ```
-```{r}
+```{r echo=FALSE} 
 par(mfrow = c(3,2))
 hist(beta_hat_1_sig1_s  , prob = TRUE, breaks = 20, border='dodgerblue', xlab = expression(hat(beta[1])))
 curve(dnorm(x, mean = s_beta_1, sd = summary(model_sig1_s)$coefficients['x1', 2]),
@@ -351,7 +441,7 @@ hist(beta_hat_1_sig10_ns, prob = TRUE, breaks = 20, border='dodgerblue', xlab = 
 curve(dnorm(x, mean = ns_beta_1, sd = summary(model_sig10_ns)$coefficients['x1', 2]),
       col = "darkorange", add = TRUE, lwd = 3)
 ```
-```{r}
+```{r echo=FALSE}
 par(mfrow = c(3,2))
 hist(beta_hat_2_sig1_s  , prob = TRUE, breaks = 20, border='dodgerblue', xlab = expression(hat(beta[2])))
 curve(dnorm(x, mean = s_beta_2, sd = summary(model_sig1_s)$coefficients['x2', 2]),
@@ -377,7 +467,7 @@ hist(beta_hat_2_sig10_ns, prob = TRUE, breaks = 20, border='dodgerblue', xlab = 
 curve(dnorm(x, mean = ns_beta_2, sd = summary(model_sig10_ns)$coefficients['x2', 2]),
       col = "darkorange", add = TRUE, lwd = 3)
 ```
-```{r}
+```{r echo=FALSE}
 par(mfrow = c(3,2))
 hist(beta_hat_3_sig1_s  , prob = TRUE, breaks = 20, border='dodgerblue', xlab = expression(hat(beta[3])))
 curve(dnorm(x, mean = s_beta_3, sd = summary(model_sig1_s)$coefficients['x3', 2]),
@@ -404,75 +494,8 @@ curve(dnorm(x, mean = ns_beta_3, sd = summary(model_sig10_ns)$coefficients['x3',
       col = "darkorange", add = TRUE, lwd = 3)
 ```
 
-```{r}
-library(knitr)
+For future work, confidence interval and prediction interval for mean response can be disscussed.
 
-df = data.frame(sig1_s = c(mean(pvals_sig1_s < 0.01),
-                            mean(pvals_sig1_s < 0.05),
-                            mean(pvals_sig1_s < 0.10)),
-                sig1_ns = c(mean(pvals_sig1_ns < 0.01),
-                            mean(pvals_sig1_ns < 0.05),
-                            mean(pvals_sig1_ns < 0.10)),
-                sig5_s = c(mean(pvals_sig5_s < 0.01),
-                            mean(pvals_sig5_s < 0.05),
-                            mean(pvals_sig5_s < 0.10)),
-                sig5_ns = c(mean(pvals_sig5_ns < 0.01),
-                            mean(pvals_sig5_ns < 0.05),
-                            mean(pvals_sig5_ns < 0.10)),
-                sig10_s = c(mean(pvals_sig10_s < 0.01),
-                            mean(pvals_sig10_s < 0.05),
-                            mean(pvals_sig10_s < 0.10)),
-                sig10_ns = c(mean(pvals_sig10_ns < 0.01),
-                            mean(pvals_sig10_ns < 0.05),
-                            mean(pvals_sig10_ns < 0.10)))
-
-kable(t(df), col.names = c('0.01','0.05','0.10'))
-```
-```{r}
-df = data.frame(sig1_s = c(mean(fstats_sig1_s < 0.01),
-                            mean(fstats_sig1_s < 0.05),
-                            mean(fstats_sig1_s < 0.10)),
-                sig1_ns = c(mean(fstats_sig1_ns < 0.01),
-                            mean(fstats_sig1_ns < 0.05),
-                            mean(fstats_sig1_ns < 0.10)),
-                sig5_s = c(mean(fstats_sig5_s < 0.01),
-                            mean(fstats_sig5_s < 0.05),
-                            mean(fstats_sig5_s < 0.10)),
-                sig5_ns = c(mean(fstats_sig5_ns < 0.01),
-                            mean(fstats_sig5_ns < 0.05),
-                            mean(fstats_sig5_ns < 0.10)),
-                sig10_s = c(mean(fstats_sig10_s < 0.01),
-                            mean(fstats_sig10_s < 0.05),
-                            mean(fstats_sig10_s < 0.10)),
-                sig10_ns = c(mean(fstats_sig10_ns < 0.01),
-                            mean(fstats_sig10_ns < 0.05),
-                            mean(fstats_sig10_ns < 0.10)))
-
-kable(t(df), col.names = c('0.01','0.05','0.10'))
-```
-
-```{r}
-df = data.frame(sig1 = c(summary(model_sig1_s)$r.squared, summary(model_sig1_ns)$r.squared),
-                sig5 = c(summary(model_sig5_s)$r.squared, summary(model_sig5_ns)$r.squared),
-                sig10 = c(summary(model_sig10_s)$r.squared, summary(model_sig10_ns)$r.squared))
-
-kable(t(df), col.names = c("Significant", "Non significant"))
-
-```
-
-
-### Results
-There are only `r` proportion whose beta_3_pval is less than 0.1. Considering my expected p-value is `r` where $\beta_3=0$ and $\alpha = 0.1$, it is easy to expect that only few of the beta_3_pval would be less than 0.1. Therefore, this result matches with what I have expected as in null hypothesis.  
-
-### Discussion
-
-
-
-
-```{r}
-birthday = 19891210
-set.seed(birthday)
-```
 
 # Simulation Study 2: Using RMSE for Selection?
 
@@ -530,6 +553,13 @@ Potential discussions:
 - Does the method **always** select the correct model? On average, does is select the correct model?
 - How does the level of noise affect the results?
 
+## Introduction
+Simulation study 2 examines whether RSME metric succesfully selects the best model among different multiple linear regression models.
+
+## Methods
+We split training and testing set following the ratio of $1:1$. Then 
+we collect RSME results from every different model. Based on this metric, the best model will have the lowest measure.
+
 ```{r}
 birthday = 19891210
 set.seed(birthday)
@@ -547,8 +577,7 @@ n = 500
 sigma = c(1,2,4)
 ```
 
-```{r}
-library(readr)
+```{r message=FALSE}
 study2_data = read_csv("study_2.csv")
 ```
 ```{r}
@@ -736,8 +765,11 @@ for (i in 2001:3000){
 }
 ```
 
+## Results
 
-```{r}
+The first plot and table shows the RSME result when $\sigma = 1$. The integer in x-axis refers to the number of predictors used for the model.
+
+```{r echo=FALSE}
 df = data.frame(Model1 = c(mean(trn_ml1[1:1000]), mean(tst_ml1[1:1000])),
                 Model2 = c(mean(trn_ml2[1:1000]), mean(tst_ml2[1:1000])),
                 Model3 = c(mean(trn_ml3[1:1000]), mean(tst_ml3[1:1000])),
@@ -749,7 +781,6 @@ df = data.frame(Model1 = c(mean(trn_ml1[1:1000]), mean(tst_ml1[1:1000])),
                 Model9 = c(mean(trn_ml9[1:1000]), mean(tst_ml9[1:1000])))
 
 
-kable(t(df), col.names = c("Training", "Testing"))
 bplot = barplot(
   matrix(c(df$Model1, df$Model2, df$Model3, df$Model4, df$Model5, df$Model6, df$Model7, df$Model8, df$Model9), nrow = 2, ncol = 9),
   beside = TRUE,
@@ -761,8 +792,12 @@ bplot = barplot(
   col=c("lightblue","orange")
 )
 
+kable(t(df), col.names = c("Training", "Testing"))
 ```
-```{r}
+
+Below is the result where $\sigma=3$.
+
+```{r echo=FALSE}
 df = data.frame(Model1 = c(mean(trn_ml1[1001:2000]), mean(tst_ml1[1001:2000])),
                 Model2 = c(mean(trn_ml2[1001:2000]), mean(tst_ml2[1001:2000])),
                 Model3 = c(mean(trn_ml3[1001:2000]), mean(tst_ml3[1001:2000])),
@@ -773,7 +808,6 @@ df = data.frame(Model1 = c(mean(trn_ml1[1001:2000]), mean(tst_ml1[1001:2000])),
                 Model8 = c(mean(trn_ml8[1001:2000]), mean(tst_ml8[1001:2000])),
                 Model9 = c(mean(trn_ml9[1001:2000]), mean(tst_ml9[1001:2000])))
 
-kable(t(df), col.names = c("Training", "Testing"))
 barplot(
   matrix(c(df$Model1, df$Model2, df$Model3, df$Model4, df$Model5, df$Model6, df$Model7, df$Model8, df$Model9), nrow = 2, ncol = 9),
   beside = TRUE,
@@ -784,8 +818,12 @@ barplot(
   main="RSME where sigma = 3",
   col=c("lightblue","orange")
 )
+kable(t(df), col.names = c("Training", "Testing"))
 ```
-```{r}
+
+Below is the result where $\sigma=5$.
+
+```{r echo=FALSE}
 df = data.frame(Model1 = c(mean(trn_ml1[2001:3000]), mean(tst_ml1[2001:3000])),
                 Model2 = c(mean(trn_ml2[2001:3000]), mean(tst_ml2[2001:3000])),
                 Model3 = c(mean(trn_ml3[2001:3000]), mean(tst_ml3[2001:3000])),
@@ -796,7 +834,6 @@ df = data.frame(Model1 = c(mean(trn_ml1[2001:3000]), mean(tst_ml1[2001:3000])),
                 Model8 = c(mean(trn_ml8[2001:3000]), mean(tst_ml8[2001:3000])),
                 Model9 = c(mean(trn_ml9[2001:3000]), mean(tst_ml9[2001:3000])))
 
-kable(t(df), col.names = c("Training", "Testing"))
 barplot(
   matrix(c(df$Model1, df$Model2, df$Model3, df$Model4, df$Model5, df$Model6, df$Model7, df$Model8, df$Model9), nrow = 2, ncol = 9),
   beside = TRUE,
@@ -807,8 +844,20 @@ barplot(
   main="RSME where sigma = 5",
   col=c("lightblue","orange")
 )
+kable(t(df), col.names = c("Training", "Testing"))
 ```
 
+## Discussion
+
+Regardless of the $\sigma$ value, it turned out that `model 6` is superior to the other models. Because of the randomness of data split process, this method does not always guarantee to choose the best model all of the time. However, on average, this method succeeded to choose the correct model when simulated for 1000 times.
+
+Note thay noise did not affect choosing the best model. While the overall RSME score has increased as $\sigma$ increases, the best model has remained the same.
+
+One interesting point is that increasing the number of predictors does not always guarantee the better model. RSME score for model6 is lower than model7, model8, and model9.
+
+Training measure always showed lower result than the testing experiment. That is beacuse interpolation is a safe and confident prediction while extrapolation is less safe and confident prediction.
+
+For future work, we may discuss other metrics such as accuracy, f1 score, and cross entropy loss. 
 
 # Simulation Study 3: Power (Graduate Students only)
 
@@ -882,6 +931,18 @@ Potential discussions:
 - How do $n$, $\beta_1$, and $\sigma$ affect power? Consider additional plots to demonstrate these effects.
 - Are $1000$ simulations sufficient?
 
+## Introduction
+
+This simulation study examines the factors that affect power. It can be assumed that $n$, $\beta_1$, and $\sigma$ are the potential variables and power as reponse. Variables that affect power will have strong relationship with response.
+
+
+## Method 
+We will run three hypothesis tests
+$$H_0: \beta_1 \propto \text{power vs } H_1: \text{not } H_0$$
+$$H_0: \sigma \propto \text{power vs } H_1: \text{not } H_0$$
+$$H_0: n \propto \text{power vs } H_1: \text{not } H_0$$
+We will visualize the three the relationship between these three variables and power for demonstration.
+
 ```{r}
 library(broom)
 n = 10
@@ -899,7 +960,7 @@ pvals_n30_s4 = rep(rep(0, length(beta_1)), 1000)
 
 
 ```{r}
-# n10 s1
+# n=10, sigma=1
   for (j in 1:1000){
     for (i in 1:length(beta_1)){
       x_values = seq(0, 5, length = n)
@@ -912,7 +973,7 @@ pvals_n30_s4 = rep(rep(0, length(beta_1)), 1000)
     }
   }
 
-# n10 s2
+# n=10, sigma=2
   for (j in 1:1000){
     for (i in 1:length(beta_1)){
       x_values = seq(0, 5, length = n)
@@ -925,7 +986,7 @@ pvals_n30_s4 = rep(rep(0, length(beta_1)), 1000)
     }
   }
 
-# n10 s3
+# n=10, sigma=3
   for (j in 1:1000){
     for (i in 1:length(beta_1)){
       x_values = seq(0, 5, length = n)
@@ -941,9 +1002,8 @@ pvals_n30_s4 = rep(rep(0, length(beta_1)), 1000)
 
 
 
-
 ```{r}
-# n20 s1
+# n=20, sigma=1
   for (j in 1:1000){
     for (i in 1:length(beta_1)){
       x_values = seq(0, 5, length = n)
@@ -956,7 +1016,7 @@ pvals_n30_s4 = rep(rep(0, length(beta_1)), 1000)
     }
   }
 
-# n20 s2
+# n=20, sigma=2
   for (j in 1:1000){
     for (i in 1:length(beta_1)){
       x_values = seq(0, 5, length = n)
@@ -969,7 +1029,7 @@ pvals_n30_s4 = rep(rep(0, length(beta_1)), 1000)
     }
   }
 
-# n20 s4
+# n=20, sigma=4
   for (j in 1:1000){
     for (i in 1:length(beta_1)){
       x_values = seq(0, 5, length = n)
@@ -982,16 +1042,11 @@ pvals_n30_s4 = rep(rep(0, length(beta_1)), 1000)
     }
   }
 ```
-```{r}
-
-```
-
-
 
 
 
 ```{r}
-# n30 s1
+# n=30, sigma=s1
   for (j in 1:1000){
     for (i in 1:length(beta_1)){
       x_values = seq(0, 5, length = n)
@@ -1004,7 +1059,7 @@ pvals_n30_s4 = rep(rep(0, length(beta_1)), 1000)
     }
   }
 
-# n30 s2
+# n=30, sigma=2
   for (j in 1:1000){
     for (i in 1:length(beta_1)){
       x_values = seq(0, 5, length = n)
@@ -1017,7 +1072,7 @@ pvals_n30_s4 = rep(rep(0, length(beta_1)), 1000)
     }
   }
 
-# n30 s4
+# n=30, sigma=4
   for (j in 1:1000){
     for (i in 1:length(beta_1)){
       x_values = seq(0, 5, length = n)
@@ -1033,15 +1088,311 @@ pvals_n30_s4 = rep(rep(0, length(beta_1)), 1000)
 
 
 
-```{r}
-length(pvals_n10_s1[pvals_n10_s1 < 0.05])
-length(pvals_n10_s2[pvals_n10_s2 < 0.05])
-length(pvals_n10_s4[pvals_n10_s4 < 0.05])
-length(pvals_n20_s1[pvals_n20_s1 < 0.05])
-length(pvals_n20_s2[pvals_n20_s2 < 0.05])
-length(pvals_n30_s4[pvals_n30_s4 < 0.05])
-length(pvals_n10_s1[pvals_n10_s1 < 0.05])
-length(pvals_n20_s2[pvals_n20_s2 < 0.05])
-length(pvals_n30_s4[pvals_n30_s4 < 0.05])
+```{r echo=FALSE, message=FALSE}
+# length(pvals_n10_s1[pvals_n10_s1 < 0.05])
+# length(pvals_n10_s2[pvals_n10_s2 < 0.05])
+# length(pvals_n10_s4[pvals_n10_s4 < 0.05])
+# length(pvals_n20_s1[pvals_n20_s1 < 0.05])
+# length(pvals_n20_s2[pvals_n20_s2 < 0.05])
+# length(pvals_n20_s4[pvals_n20_s4 < 0.05])
+# length(pvals_n30_s1[pvals_n30_s1 < 0.05])
+# length(pvals_n30_s2[pvals_n30_s2 < 0.05])
+# length(pvals_n30_s4[pvals_n30_s4 < 0.05])
+```
+## Results
+
+The result below shows how increase in sample size(n) affects power.
+
+```{r echo=FALSE}
+q3df = data.frame(x1 = mean(pvals_n10_s1[pvals_n10_s1 < 0.05]),
+                  x2 = mean(pvals_n20_s1[pvals_n20_s1 < 0.05]),
+                  x3 = mean(pvals_n30_s1[pvals_n30_s1 < 0.05]))
+par(mfrow = c(1,3))
+barplot(
+  matrix(c(q3df$x1, q3df$x2, q3df$x3), nrow = 1, ncol = 3),
+  beside = TRUE,
+  xlab='Sample size',
+  names.arg=c('n=10',',n=20','n=30'),
+  ylab='Power',
+  # legend.text = c('train data', 'test data', 'd'),
+  main= expression(sigma == 1),
+  col=c("lightblue","orange","dodgerblue")
+)
+abline(h=mean(pvals_n10_s1[pvals_n10_s1 < 0.05]), col='red')
+
+q3df = data.frame(x1 = mean(pvals_n10_s1[pvals_n10_s2 < 0.05]),
+                  x2 = mean(pvals_n20_s1[pvals_n20_s2 < 0.05]),
+                  x3 = mean(pvals_n30_s1[pvals_n30_s2 < 0.05]))
+
+barplot(
+  matrix(c(q3df$x1, q3df$x2, q3df$x3), nrow = 1, ncol = 3),
+  beside = TRUE,
+  xlab='Sample size',
+  names.arg=c('n=10','n=20','n=30'),
+  ylab='Power',
+  # legend.text = c('train data', 'test data', 'd'),
+  main= expression(sigma == 2),
+  col=c("lightblue","orange","dodgerblue")
+)
+abline(h=q3df$x1, col='red')
+
+q3df = data.frame(x1 = mean(pvals_n10_s1[pvals_n10_s4 < 0.05]),
+                  x2 = mean(pvals_n20_s1[pvals_n20_s4 < 0.05]),
+                  x3 = mean(pvals_n30_s1[pvals_n30_s4 < 0.05]))
+
+barplot(
+  matrix(c(q3df$x1, q3df$x2, q3df$x3), nrow = 1, ncol = 3),
+  beside = TRUE,
+  xlab='Sample size',
+  names.arg=c('n=10','n=20','n=30'),
+  ylab='Power',
+  # legend.text = c('train data', 'test data', 'd'),
+  main= expression(sigma == 4),
+  col=c("lightblue","orange","dodgerblue")
+)
+abline(h=q3df$x1, col='red')
 ```
 
+The plot below shows how increase in error($sigma$) affects power.
+
+```{r echo=FALSE}
+par(mfrow = c(1,3))
+
+barplot(c(mean(pvals_n10_s1[pvals_n10_s1 < 0.05]), mean(pvals_n10_s1[pvals_n10_s2 < 0.05]), mean(pvals_n10_s1[pvals_n10_s4 < 0.05])),
+          beside = TRUE,
+  xlab='Standard Deviation',
+  names.arg=c(expression(sigma == 1),expression(sigma == 2),expression(sigma == 4)),
+  ylab='Power',
+  # legend.text = c('train data', 'test data', 'd'),
+  main= "Increase in Sigma where n=10",
+  col=c("lightblue","orange","dodgerblue"))
+abline(h=q3df$x1, col='red')
+
+barplot(c(mean(pvals_n20_s1[pvals_n20_s1 < 0.05]), mean(pvals_n20_s1[pvals_n20_s2 < 0.05]), mean(pvals_n20_s1[pvals_n20_s4 < 0.05])),
+          beside = TRUE,
+  xlab='Standard Deviation',
+  names.arg=c(expression(sigma == 1),expression(sigma == 2),expression(sigma == 4)),
+  ylab='Power',
+  # legend.text = c('train data', 'test data', 'd'),
+  main= "Increase in Sigma where n=20",
+  col=c("lightblue","orange","dodgerblue"))
+abline(h=mean(pvals_n20_s1[pvals_n20_s4 < 0.05]), col='red')
+
+barplot(c(mean(pvals_n10_s1[pvals_n30_s1 < 0.05]), mean(pvals_n10_s1[pvals_n30_s2 < 0.05]), mean(pvals_n10_s1[pvals_n30_s4 < 0.05])),
+          beside = TRUE,
+  xlab='Standard Deviation',
+  names.arg=c(expression(sigma == 1),expression(sigma == 2),expression(sigma == 4)),
+  ylab='Power',
+  # legend.text = c('train data', 'test data', 'd'),
+  main= "Increase in Sigma where n=30",
+  col=c("lightblue","orange","dodgerblue"))
+abline(h=mean(pvals_n10_s1[pvals_n30_s1 < 0.05]), col='red')
+```
+
+The last plot shows how change in $\beta$ affects power.
+
+```{r echo=FALSE}
+par(mfrow = c(1,3))
+
+beta_01 = seq(01, length(pvals_n10_s1), 41)
+beta_02 = seq(02, length(pvals_n10_s1), 41)
+beta_03 = seq(03 , length(pvals_n10_s1), 41)
+beta_04 = seq(04, length(pvals_n10_s1), 41)
+beta_05 = seq(05, length(pvals_n10_s1), 41)
+beta_06 = seq(06, length(pvals_n10_s1), 41)
+beta_07 = seq(07, length(pvals_n10_s1), 41)
+beta_08 = seq(08, length(pvals_n10_s1), 41)
+beta_09 = seq(09 , length(pvals_n10_s1), 41)
+beta_10 = seq( 10, length(pvals_n10_s1), 41)
+beta_11 = seq( 11, length(pvals_n10_s1), 41)
+beta_12 = seq( 12, length(pvals_n10_s1), 41)
+beta_13 = seq( 13, length(pvals_n10_s1), 41)
+beta_14 = seq( 14, length(pvals_n10_s1), 41)
+beta_15 = seq( 15, length(pvals_n10_s1), 41)
+beta_16 = seq( 16, length(pvals_n10_s1), 41)
+beta_17 = seq( 17, length(pvals_n10_s1), 41)
+beta_18 = seq( 18, length(pvals_n10_s1), 41)
+beta_19 = seq( 19, length(pvals_n10_s1), 41)
+beta_20 = seq( 20, length(pvals_n10_s1), 41)
+beta_21 = seq( 21, length(pvals_n10_s1), 41)
+beta_22 = seq( 22, length(pvals_n10_s1), 41)
+beta_23 = seq( 23, length(pvals_n10_s1), 41)
+beta_24 = seq( 24, length(pvals_n10_s1), 41)
+beta_25 = seq( 25, length(pvals_n10_s1), 41)
+beta_26 = seq( 26, length(pvals_n10_s1), 41)
+beta_27 = seq( 27, length(pvals_n10_s1), 41)
+beta_28 = seq( 28, length(pvals_n10_s1), 41)
+beta_29 = seq( 29, length(pvals_n10_s1), 41)
+beta_30 = seq( 30, length(pvals_n10_s1), 41)
+beta_31 = seq( 31, length(pvals_n10_s1), 41)
+beta_32 = seq( 32, length(pvals_n10_s1), 41)
+beta_33 = seq( 33, length(pvals_n10_s1), 41)
+beta_34 = seq( 34, length(pvals_n10_s1), 41)
+beta_35 = seq( 35, length(pvals_n10_s1), 41)
+beta_36 = seq( 36, length(pvals_n10_s1), 41)
+beta_37 = seq( 37, length(pvals_n10_s1), 41)
+beta_38 = seq( 38, length(pvals_n10_s1), 41)
+beta_39 = seq( 39, length(pvals_n10_s1), 41)
+beta_40 = seq( 40, length(pvals_n10_s1), 41)
+beta_41 = seq( 41, length(pvals_n10_s1), 41)
+
+n10_s1 = c(
+mean(pvals_n10_s1[beta_01 & pvals_n10_s1 < 0.05]),
+mean(pvals_n10_s1[beta_02 & pvals_n10_s1 < 0.05]),
+mean(pvals_n10_s1[beta_03 & pvals_n10_s1 < 0.05]),
+mean(pvals_n10_s1[beta_04 & pvals_n10_s1 < 0.05]),
+mean(pvals_n10_s1[beta_05 & pvals_n10_s1 < 0.05]),
+mean(pvals_n10_s1[beta_06 & pvals_n10_s1 < 0.05]),
+mean(pvals_n10_s1[beta_07 & pvals_n10_s1 < 0.05]),
+mean(pvals_n10_s1[beta_08 & pvals_n10_s1 < 0.05]),
+mean(pvals_n10_s1[beta_09 & pvals_n10_s1 < 0.05]),
+mean(pvals_n10_s1[beta_10 & pvals_n10_s1 < 0.05]),
+mean(pvals_n10_s1[beta_11 & pvals_n10_s1 < 0.05]),
+mean(pvals_n10_s1[beta_12 & pvals_n10_s1 < 0.05]),
+mean(pvals_n10_s1[beta_13 & pvals_n10_s1 < 0.05]),
+mean(pvals_n10_s1[beta_14 & pvals_n10_s1 < 0.05]),
+mean(pvals_n10_s1[beta_15 & pvals_n10_s1 < 0.05]),
+mean(pvals_n10_s1[beta_16 & pvals_n10_s1 < 0.05]),
+mean(pvals_n10_s1[beta_17 & pvals_n10_s1 < 0.05]),
+mean(pvals_n10_s1[beta_18 & pvals_n10_s1 < 0.05]),
+mean(pvals_n10_s1[beta_19 & pvals_n10_s1 < 0.05]),
+mean(pvals_n10_s1[beta_20 & pvals_n10_s1 < 0.05]),
+mean(pvals_n10_s1[beta_21 & pvals_n10_s1 < 0.05]),
+mean(pvals_n10_s1[beta_22 & pvals_n10_s1 < 0.05]),
+mean(pvals_n10_s1[beta_23 & pvals_n10_s1 < 0.05]),
+mean(pvals_n10_s1[beta_24 & pvals_n10_s1 < 0.05]),
+mean(pvals_n10_s1[beta_25 & pvals_n10_s1 < 0.05]),
+mean(pvals_n10_s1[beta_26 & pvals_n10_s1 < 0.05]),
+mean(pvals_n10_s1[beta_27 & pvals_n10_s1 < 0.05]),
+mean(pvals_n10_s1[beta_28 & pvals_n10_s1 < 0.05]),
+mean(pvals_n10_s1[beta_29 & pvals_n10_s1 < 0.05]),
+mean(pvals_n10_s1[beta_30 & pvals_n10_s1 < 0.05]),
+mean(pvals_n10_s1[beta_31 & pvals_n10_s1 < 0.05]),
+mean(pvals_n10_s1[beta_32 & pvals_n10_s1 < 0.05]),
+mean(pvals_n10_s1[beta_33 & pvals_n10_s1 < 0.05]),
+mean(pvals_n10_s1[beta_34 & pvals_n10_s1 < 0.05]),
+mean(pvals_n10_s1[beta_35 & pvals_n10_s1 < 0.05]),
+mean(pvals_n10_s1[beta_36 & pvals_n10_s1 < 0.05]),
+mean(pvals_n10_s1[beta_37 & pvals_n10_s1 < 0.05]),
+mean(pvals_n10_s1[beta_38 & pvals_n10_s1 < 0.05]),
+mean(pvals_n10_s1[beta_39 & pvals_n10_s1 < 0.05]),
+mean(pvals_n10_s1[beta_40 & pvals_n10_s1 < 0.05]),
+mean(pvals_n10_s1[beta_41 & pvals_n10_s1 < 0.05])
+)
+n20_s1 = c(
+mean(pvals_n20_s1[beta_01 & pvals_n20_s1 < 0.05]),
+mean(pvals_n20_s1[beta_02 & pvals_n20_s1 < 0.05]),
+mean(pvals_n20_s1[beta_03 & pvals_n20_s1 < 0.05]),
+mean(pvals_n20_s1[beta_04 & pvals_n20_s1 < 0.05]),
+mean(pvals_n20_s1[beta_05 & pvals_n20_s1 < 0.05]),
+mean(pvals_n20_s1[beta_06 & pvals_n20_s1 < 0.05]),
+mean(pvals_n20_s1[beta_07 & pvals_n20_s1 < 0.05]),
+mean(pvals_n20_s1[beta_08 & pvals_n20_s1 < 0.05]),
+mean(pvals_n20_s1[beta_09 & pvals_n20_s1 < 0.05]),
+mean(pvals_n20_s1[beta_10 & pvals_n20_s1 < 0.05]),
+mean(pvals_n20_s1[beta_11 & pvals_n20_s1 < 0.05]),
+mean(pvals_n20_s1[beta_12 & pvals_n20_s1 < 0.05]),
+mean(pvals_n20_s1[beta_13 & pvals_n20_s1 < 0.05]),
+mean(pvals_n20_s1[beta_14 & pvals_n20_s1 < 0.05]),
+mean(pvals_n20_s1[beta_15 & pvals_n20_s1 < 0.05]),
+mean(pvals_n20_s1[beta_16 & pvals_n20_s1 < 0.05]),
+mean(pvals_n20_s1[beta_17 & pvals_n20_s1 < 0.05]),
+mean(pvals_n20_s1[beta_18 & pvals_n20_s1 < 0.05]),
+mean(pvals_n20_s1[beta_19 & pvals_n20_s1 < 0.05]),
+mean(pvals_n20_s1[beta_20 & pvals_n20_s1 < 0.05]),
+mean(pvals_n20_s1[beta_21 & pvals_n20_s1 < 0.05]),
+mean(pvals_n20_s1[beta_22 & pvals_n20_s1 < 0.05]),
+mean(pvals_n20_s1[beta_23 & pvals_n20_s1 < 0.05]),
+mean(pvals_n20_s1[beta_24 & pvals_n20_s1 < 0.05]),
+mean(pvals_n20_s1[beta_25 & pvals_n20_s1 < 0.05]),
+mean(pvals_n20_s1[beta_26 & pvals_n20_s1 < 0.05]),
+mean(pvals_n20_s1[beta_27 & pvals_n20_s1 < 0.05]),
+mean(pvals_n20_s1[beta_28 & pvals_n20_s1 < 0.05]),
+mean(pvals_n20_s1[beta_29 & pvals_n20_s1 < 0.05]),
+mean(pvals_n20_s1[beta_30 & pvals_n20_s1 < 0.05]),
+mean(pvals_n20_s1[beta_31 & pvals_n20_s1 < 0.05]),
+mean(pvals_n20_s1[beta_32 & pvals_n20_s1 < 0.05]),
+mean(pvals_n20_s1[beta_33 & pvals_n20_s1 < 0.05]),
+mean(pvals_n20_s1[beta_34 & pvals_n20_s1 < 0.05]),
+mean(pvals_n20_s1[beta_35 & pvals_n20_s1 < 0.05]),
+mean(pvals_n20_s1[beta_36 & pvals_n20_s1 < 0.05]),
+mean(pvals_n20_s1[beta_37 & pvals_n20_s1 < 0.05]),
+mean(pvals_n20_s1[beta_38 & pvals_n20_s1 < 0.05]),
+mean(pvals_n20_s1[beta_39 & pvals_n20_s1 < 0.05]),
+mean(pvals_n20_s1[beta_40 & pvals_n20_s1 < 0.05]),
+mean(pvals_n20_s1[beta_41 & pvals_n20_s1 < 0.05])
+)
+n30_s1 = c(
+mean(pvals_n30_s1[beta_01 & pvals_n30_s1 < 0.05]),
+mean(pvals_n30_s1[beta_02 & pvals_n30_s1 < 0.05]),
+mean(pvals_n30_s1[beta_03 & pvals_n30_s1 < 0.05]),
+mean(pvals_n30_s1[beta_04 & pvals_n30_s1 < 0.05]),
+mean(pvals_n30_s1[beta_05 & pvals_n30_s1 < 0.05]),
+mean(pvals_n30_s1[beta_06 & pvals_n30_s1 < 0.05]),
+mean(pvals_n30_s1[beta_07 & pvals_n30_s1 < 0.05]),
+mean(pvals_n30_s1[beta_08 & pvals_n30_s1 < 0.05]),
+mean(pvals_n30_s1[beta_09 & pvals_n30_s1 < 0.05]),
+mean(pvals_n30_s1[beta_10 & pvals_n30_s1 < 0.05]),
+mean(pvals_n30_s1[beta_11 & pvals_n30_s1 < 0.05]),
+mean(pvals_n30_s1[beta_12 & pvals_n30_s1 < 0.05]),
+mean(pvals_n30_s1[beta_13 & pvals_n30_s1 < 0.05]),
+mean(pvals_n30_s1[beta_14 & pvals_n30_s1 < 0.05]),
+mean(pvals_n30_s1[beta_15 & pvals_n30_s1 < 0.05]),
+mean(pvals_n30_s1[beta_16 & pvals_n30_s1 < 0.05]),
+mean(pvals_n30_s1[beta_17 & pvals_n30_s1 < 0.05]),
+mean(pvals_n30_s1[beta_18 & pvals_n30_s1 < 0.05]),
+mean(pvals_n30_s1[beta_19 & pvals_n30_s1 < 0.05]),
+mean(pvals_n30_s1[beta_20 & pvals_n30_s1 < 0.05]),
+mean(pvals_n30_s1[beta_21 & pvals_n30_s1 < 0.05]),
+mean(pvals_n30_s1[beta_22 & pvals_n30_s1 < 0.05]),
+mean(pvals_n30_s1[beta_23 & pvals_n30_s1 < 0.05]),
+mean(pvals_n30_s1[beta_24 & pvals_n30_s1 < 0.05]),
+mean(pvals_n30_s1[beta_25 & pvals_n30_s1 < 0.05]),
+mean(pvals_n30_s1[beta_26 & pvals_n30_s1 < 0.05]),
+mean(pvals_n30_s1[beta_27 & pvals_n30_s1 < 0.05]),
+mean(pvals_n30_s1[beta_28 & pvals_n30_s1 < 0.05]),
+mean(pvals_n30_s1[beta_29 & pvals_n30_s1 < 0.05]),
+mean(pvals_n30_s1[beta_30 & pvals_n30_s1 < 0.05]),
+mean(pvals_n30_s1[beta_31 & pvals_n30_s1 < 0.05]),
+mean(pvals_n30_s1[beta_32 & pvals_n30_s1 < 0.05]),
+mean(pvals_n30_s1[beta_33 & pvals_n30_s1 < 0.05]),
+mean(pvals_n30_s1[beta_34 & pvals_n30_s1 < 0.05]),
+mean(pvals_n30_s1[beta_35 & pvals_n30_s1 < 0.05]),
+mean(pvals_n30_s1[beta_36 & pvals_n30_s1 < 0.05]),
+mean(pvals_n30_s1[beta_37 & pvals_n30_s1 < 0.05]),
+mean(pvals_n30_s1[beta_38 & pvals_n30_s1 < 0.05]),
+mean(pvals_n30_s1[beta_39 & pvals_n30_s1 < 0.05]),
+mean(pvals_n30_s1[beta_40 & pvals_n30_s1 < 0.05]),
+mean(pvals_n30_s1[beta_41 & pvals_n30_s1 < 0.05])
+)
+
+plot(n10_s1, xlab = expression(beta),
+    ylab = 'power',
+    main = 'power and beta',
+    pch = 20,
+    cex = 1,
+    col = 'grey')
+plot(n20_s1, xlab = expression(beta),
+    ylab = 'power',
+    main = 'power and beta',
+    pch = 20,
+    cex = 1,
+    col = 'grey')
+plot(n30_s1, xlab = expression(beta),
+    ylab = 'power',
+    main = 'power and beta',
+    pch = 20,
+    cex = 1,
+    col = 'grey')
+
+```
+
+## Discussion
+
+The first plot shows that sample size ($n$) does not affect power significantly. While a little discrepancy is observable, it does not seem to affect significantly. 
+
+However, increase in $\sigma$ significantly affect power. Considering $\sigma$ is noise, it is expected that increase in noise will cause more error. 
+
+The third plot showed that change in beta does not affect power. That is because power already assumes that $H_1$ is true. 
+
+While 1000 is usually a large number enough for simulation, increased number of simulations is encouraged. That us because some inconsitency was found in plot 3. While $\sigma=4$ where n=30 is expected to have higher power, it turned out $\sigma=1$ where n=10 scored the highest score.
