@@ -58,10 +58,40 @@ Load the data, and check its structure using `str()`. Verify that `type` is a fa
 
 - Make a scatterplot of `CO2` versus `horse`. Use a different color point for each vehicle `type`.
 - Fit a simple linear regression model with `CO2` as the response and only `horse` as the predictor.
+
+```{r}
+library(readr)
+epa_data = read_csv("epa2017.csv")
+epa_data$type = as.factor(epa_data$type)
+epa_model = lm(CO2 ~ horse, data = epa_data)
+# epa_data$type
+plot(CO2 ~ horse, data=epa_data, col = c(3,4,6), pch = c(1,2,3), cex=.5
+     , main = "Relationship between CO2 and Horse", xlab='horsepower (foot-pounds/sec)', ylab = 'CO2 (g/mi)')
+legend("bottomright", legend=c('Both', 'Car', 'Truck'), col=c(3,4,6), pch=c(1,2,3))
+
+abline(epa_model, col=2, lty = 1, lwd = 2)
+
+```
+
+
 - Add the fitted regression line to the scatterplot. Comment on how well this line models the data.
+
+While the regression line succeeds to find the linear relationship between CO2 and horsepower for any type of cars, there still is a room for improvement. By adjusting intercepts and slopes for each vehicle type, this model can be improved.
+
 - Give an estimate for the average change in `CO2` for a one foot-pound per second increase in `horse` for a vehicle of type `car`. 
+
+```{r}
+coef(epa_model)[1]
+```
+
+Simple linear model is able to capture the average change in `CO2` for a one foot-pound per second increase in `horse` for *any* type of vehicle.
+
 - Give a 90% prediction interval using this model for the `CO2` of a Subaru Impreza Wagon, which is a vehicle with 148 horsepower and is considered type `Both`. (Interestingly, the dataset gives the wrong drivetrain for most Subarus in this dataset, as they are almost all listed as `F`, when they are in fact all-wheel drive.)
 
+```{r}
+predict(epa_model, level = .9, interval = 'prediction', newdata = data.frame(horse = 148, type = 'Both'))
+```
+ 
 **(b)** Do the following:
 
 - Make a scatterplot of `CO2` versus `horse`. Use a different color point for each vehicle `type`.
