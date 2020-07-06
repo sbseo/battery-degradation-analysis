@@ -96,19 +96,86 @@ predict(epa_model, level = .9, interval = 'prediction', newdata = data.frame(hor
 
 - Make a scatterplot of `CO2` versus `horse`. Use a different color point for each vehicle `type`.
 - Fit an additive multiple regression model with `CO2` as the response and `horse` and `type` as the predictors.
+
+
+```{r}
+epa_data = read_csv("epa2017.csv")
+epa_data$type = as.factor(epa_data$type)
+epa_add = lm(CO2 ~ horse + type, data = epa_data)
+# epa_data$type
+plot(CO2 ~ horse, data=epa_data, col = c(3,4,6), pch = c(1,2,3), cex=.5
+     , main = "Relationship between CO2 and Horse", xlab='horsepower (foot-pounds/sec)', ylab = 'CO2 (g/mi)')
+legend("bottomright", legend=c('Both', 'Car', 'Truck'), col=c(3,4,6), pch=c(1,2,3))
+
+abline(coef(epa_add)[1],coef(epa_add)[2], col=3, lty = 2, lwd = 2)
+abline(coef(epa_add)[1]+coef(epa_add)[3], coef(epa_add)[2], col=4, lty = 1, lwd = 2)
+abline(coef(epa_add)[1]+coef(epa_add)[4], coef(epa_add)[2], col=6, lty = 1, lwd = 2)
+```
+
 - Add the fitted regression "lines" to the scatterplot with the same colors as their respective points (one line for each vehicle type). Comment on how well this line models the data. 
+
+Unlike simple linear model, addictive model provides three different intercepts. Based on the type of the vehicle, vehicles are now easily able to be classified. However, there still is a room left for improvement. All of the lines do not have to share the same slope.
+
 - Give an estimate for the average change in `CO2` for a one foot-pound per second increase in `horse` for a vehicle of type `car`. 
+
+```{r}
+coef(epa_model)[2]
+```
+
+All of the lines share the same slope in addictive model
+
 - Give a 90% prediction interval using this model for the `CO2` of a Subaru Impreza Wagon, which is a vehicle with 148 horsepower and is considered type `Both`. 
+```{r}
+predict(epa_add, level = .9, interval = 'prediction', newdata = data.frame(horse = 148, type = 'Both'))
+```
+
 
 **(c)** Do the following:
 
 - Make a scatterplot of `CO2` versus `horse`. Use a different color point for each vehicle `type`. 
 - Fit an interaction multiple regression model with `CO2` as the response and `horse` and `type` as the predictors.
+
+```{r}
+epa_data = read_csv("epa2017.csv")
+epa_data$type = as.factor(epa_data$type)
+epa_int = lm(CO2 ~ horse * type, data = epa_data)
+# epa_data$type
+plot(CO2 ~ horse, data=epa_data, col = c(3,4,6), pch = c(1,2,3), cex=.5
+     , main = "Relationship between CO2 and Horse", xlab='horsepower (foot-pounds/sec)', ylab = 'CO2 (g/mi)')
+legend("bottomright", legend=c('Both', 'Car', 'Truck'), col=c(3,4,6), pch=c(1,2,3))
+
+abline(coef(epa_int)[1],  coef(epa_int)[2], col=3, lty = 2, lwd = 2)
+abline(coef(epa_int)[1] + coef(epa_int)[3], coef(epa_int)[2] + coef(epa_int)[5],  col=4, lty = 1, lwd = 2)
+abline(coef(epa_int)[1] + coef(epa_int)[4], coef(epa_int)[2] + coef(epa_int)[6],  col=6, lty = 1, lwd = 2)
+
+
+```
+
+
 - Add the fitted regression "lines" to the scatterplot with the same colors as their respective points (one line for each vehicle type). Comment on how well this line models the data. 
+
+Among simple model, addictive model, and interaction model, this interaction model shows superior result to the others. That is because slope and intercept is adjusted based on the type of vehicles.
+
 - Give an estimate for the average change in `CO2` for a one foot-pound per second increase in `horse` for a vehicle of type `car`. 
+
+```{r}
+coef(epa_int)[2] + coef(epa_int)[5]  
+```
+
 - Give a 90% prediction interval using this model for the `CO2` of a Subaru Impreza Wagon, which is a vehicle with 148 horsepower and is considered type `Both`. 
 
+```{r}
+predict(epa_int, level = .9, interval = 'prediction', newdata = data.frame(horse = 148, type = 'Both'))
+```
+
+
 **(d)** Based on the previous plots, you probably already have an opinion on the best model. Now use an ANOVA $F$-test to compare the additive and interaction models. Based on this test and a significance level of $\alpha = 0.10$, which model is preferred?
+
+```{r}
+anova(epa_add, epa_int)
+```
+
+Since $\alpha$ is greater than p-value, we reject null hypothesis. It means that interaction model is more preferred than addictive model.
 
 ***
 
@@ -134,13 +201,55 @@ For this exercise, we will use `Age`, `Education`, `Income`, and `Sex` in an att
 
 **(a)** Load the data, and check its structure using `str()`. Verify that `Education`, `Income`, and `Sex` are factors; if not, coerce them to be factors. What are the levels of `Education`, `Income`, and `Sex`?
 
+```{r}
+hdata = read_csv("hospital.csv")
+
+hdata$Education= as.factor(hdata$Education)
+hdata$Income   = as.factor(hdata$Income)
+hdata$Sex      = as.factor(hdata$Sex)
+
+levels(hdata$Education)
+levels(hdata$Income   )
+levels(hdata$Sex      )
+```
+
 **(b)** Fit an additive multiple regression model with `Blood` as the response using `Age`, `Education`, `Income`, and `Sex` as predictors. What does `R` choose as the reference level for `Education`, `Income`, and `Sex`?
+
+```{r}
+h_add = lm(Blood ~ Age + Education + Income + Sex, data=hdata)
+summary(h_add)
+```
+Based on the alphabetical order(A-Z), the beginning words are chosen as reference level.
+
 
 **(c)** Fit a multiple regression model with `Blood` as the response. Use the main effects of `Age`, `Education`, `Income`, and `Sex`, as well as the interaction of `Sex` with `Age` and the interaction of `Sex` and `Income`. Use a statistical test to compare this model to the additive model using a significance level of $\alpha = 0.10$. Which do you prefer?
 
+```{r}
+h_int = lm(Blood ~ Age + Education + Income + Sex + Sex:Age + Sex:Income, data=hdata)
+
+anova(h_add, h_int)
+```
+
+$$H_0: \beta_{Sex:Age} = \beta_{Sex:Income} = 0 \text{ vs } H_A: \text{not } H_0 $$
+Since p-value is greater than $\alpha = 0.10$, we fail to reject the null hypothesis. It means that addictive model is more suggested than interaction model at $\alpha = 0.10$.
+
 **(d)** Fit a model similar to that in **(c)**, but additionally add the interaction between `Income` and `Age` as well as a three-way interaction between `Age`, `Income`, and `Sex`. Use a statistical test to compare this model to the preferred model from **(c)** using a significance level of $\alpha = 0.10$. Which do you prefer?
 
+```{r}
+h_threeint = lm(Blood ~ Age + Education + Income + Sex + Sex:Age + Sex:Income + Age:Income + Age:Income:Sex, data=hdata)
+
+anova(h_int, h_threeint)
+
+```
+$$H_0: \beta_{Age:Income} = \beta_{Age:Income:Sex} = 0 \text{ vs } H_A: \text{not } H_0 $$
+Since p-value is greater than $\alpha = 0.10$, we fail to reject the null hypothesis. It means that two way interaction model with Sex:Age and Sex:Income is more suggested at $\alpha = 0.10$.
+
+
 **(e)** Using the model in **(d)**, give an estimate of the change in average `Blood` for a one-unit increase in `Age` for a highly educated, low income, male patient.
+
+```{r}
+coef(h_threeint)[2] + coef(h_threeint)[6] + coef(h_threeint)[8] + coef(h_threeint)[9]
+```
 
 ***
 
