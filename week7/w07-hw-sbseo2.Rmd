@@ -288,23 +288,43 @@ where
 
 **(a)** Fit the model above. Also fit a smaller model using the provided `R` code.
 
-```{r, eval = FALSE}
-days_add = lm(Days ~ Pressure + Blood + Rate, data = hospital)
+```{r}
+days_add = lm(Days ~ Pressure + Blood + Rate, data = hdata)
+days_int = lm(Days ~ Pressure * Blood * Rate, data = hdata)
 ```
+
 
 Use a statistical test to compare the two models. Report the following:
 
 - The null and alternative hypotheses in terms of the model given in the exercise description
+$$H_0: \beta_4=\beta_5=...=\beta7=0 \text{ vs } H_A: \text{ not } H_0$$
+Null hypothesis here is multiple linear regression(addictive) without any interaction. Alternative hypthesis is three-way interaction model along with lower order interactions. 
+
 - The value of the test statistic
+```{r}
+anova(days_add, days_int)$F[2]
+```
+
 - The p-value of the test
+```{r}
+anova(days_add, days_int)$'Pr(>F)'[2]
+```
+
 - A statistical decision using a significance level of $\alpha = 0.10$
+
+Since $\alpha = 0.10$ is greater than p-value, reject null hypothesis.
+
 - Which model you prefer
+
+I prefer interaction model to addictive model at $\alpha = 0.10$.
 
 **(b)** Give an expression based on the model in the exercise description for the true change in length of hospital stay in days for a 1 bpm increase in `Rate` for a patient with a `Pressure` of 139 mmHg and a `Blood` of 10 gm/dL. Your answer should be a linear function of the $\beta$s.
 
+$$ Y = \beta_0 + 10\beta_1 + 139\beta_2 + \beta_3 + 1390\beta_4 + 10\beta_5 + 139\beta_6 + 1390\beta_7$$
+
 **(c)** Give an expression based on the additive model in part **(a)** for the true change in length of hospital stay in days for a 1 bpm increase in `Rate` for a patient with a `Pressure` of 139 mmHg and a `Blood` of 10 gm/dL. Your answer should be a linear function of the $\beta$s.
 
-***
+$$ Y = \beta_0 + 10\beta_1 + 139\beta_2 + \beta_3 $$
 
 ## Exercise 4 ($t$-test Is a Linear Model)
 
