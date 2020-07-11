@@ -1,0 +1,45 @@
+---
+title: "w04-quiz4"
+author: "Bruno Seo"
+date: "6/19/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+# 1
+pnorm(1, -1, sqrt(3/4), lower.tail = FALSE)
+```
+
+
+```{r}
+# 2
+model = lm(y ~ x, data = quiz_data)
+idx = which(hatvalues(model) == max(hatvalues(model)))
+cooks.distance(model)
+cooks.distance(model)[idx]
+```
+
+
+```{r}
+# 3
+shapiro.test(resid(model))
+shapiro.test(resid(model))$p.value
+```
+
+```{r}
+# 4
+model = lm(log(y) ~ x + I(x^2), data = quiz_data)
+shapiro.test(resid(model))$p.value
+# Fail to reject h_0. Normality is not suspect
+```
+
+```{r}
+# 5
+model = lm(log(y) ~ x + I(x^2), data = quiz_data)
+sum((exp(fitted(model)) - quiz_data$y)^2) / 10^9 # report in billions
+```
