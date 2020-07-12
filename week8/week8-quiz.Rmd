@@ -12,69 +12,125 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r}
 # 1
+data_1_x = c(1.816617139,2.910830978,0.523363590,1.427366346,2.173443618,2.628308016,1.132511025,1.922808607,1.964031596,1.518647378,0.910043139,2.148749041,0.871560465,0.588675698,0.967735691,2.521283686,0.004785291,0.495870255,0.664491970,0.706095344,2.478035028,0.941858819,1.161056508,1.594047979,2.749399306)
+data_1_y = c( 8.628446,  9.814468,  3.267981,  6.237282,  9.175347, 10.001064,  3.526098,  8.268346,  6.966502,  6.188910,  4.693662,  8.583369,  5.929547,  2.859877,  4.813658, 10.569102,  1.481629,  1.028052,  3.949099,  5.322015,  9.650955,  3.974221,  6.818404,  5.919883,  9.990461)
+data_1 = data.frame(y=data_1_y, x=data_1_x)
+
+data_2_x = c(1.816617139,2.910830978,0.523363590, 1.427366346, 2.173443618, 2.628308016, 1.132511025, 1.922808607,1.964031596, 1.518647378, 0.910043139, 2.148749041, 0.871560465, 0.588675698, 0.967735691, 2.521283686, 0.004785291, 0.495870255, 0.664491970, 0.706095344, 2.478035028,0.941858819, 1.161056508, 1.594047979, 
+2.749399306)
+data_2_y = c(12.200446, 10.567401, 4.327978, 5.984498, 8.441462, 9.459846, 6.479105, 10.049235, 8.775958, 7.326474, 4.377036, 9.004340, 5.055420, 2.649057, 4.624347, 8.867973, 5.301955, 3.851948, 4.702853, 4.724654, 10.722705, 4.898689, 6.724598, 5.817151, 8.837730)
+
+data_2 = data.frame(y=data_2_y, x=data_2_x)
+
+model1 = lm(y~x, data=data_1)
+model2 = lm(y~x, data=data_2) 
+
+par(mfrow = c(1,2))
+qqnorm(resid(model1))
+qqline(resid(model1))
+qqnorm(resid(model2))
+qqline(resid(model2))
+
+# The normality assumption is more suspect for the model fit to data_2
 ```
 
 
 ```{r}
 # 2
+par(mfrow = (c(1,2)))
+plot(resid(model1)~fitted(model1))
+abline(h=0)
+plot(resid(model2)~fitted(model2))
+abline(h=0)
+# First attempt: The equal variance assumption is more suspect for data_2
+# Second attempt: The equal variance assumption is more suspect for data_1
 ```
 
 
 ```{r}
 # 3
+pnorm(-12, -10, 3)
+
 ```
 
 ```{r}
 # 4
+model = lm(sr~., data=LifeCycleSavings)
+length(rstandard(model)[abs(rstandard(model)) < 2]) / length(rstandard(model))
 ```
 
 ```{r}
 # 5
+which.max(rstandard(model))
 ```
 
 ```{r}
 # 6
+length(hatvalues(model)[hatvalues(model) > 2*mean(hatvalues(model))])
 ```
 
 ```{r}
 # 7
+which.max(hatvalues(model))
 ```
 
 ```{r}
 # 8
+max(cooks.distance(model))
+
 ```
 
 ```{r}
 # 9
+cd_model = cooks.distance(model)
+
+new_model = lm(sr~., data=LifeCycleSavings, subset = cd_model  <= 4 / length(cd_model))
+sum(coef(new_model))
+
+
 ```
 
 ```{r}
 # 10
+airquality = na.omit(airquality)
+air_model1 = lm(Ozone~Temp+I(Temp^2), data=airquality)
+summary(air_model1)$coefficients[3,4]
+
 ```
 
 ```{r}
 # 11
+airquality = na.omit(airquality)
+air_model2 = lm(Ozone~Temp+I(Temp^2)+I(Temp^3)+I(Temp^4), data=airquality)
+anova(air_model1, air_model2)["Pr(>F)"][[1]][2]
 ```
 
 ```{r}
 # 12
+shapiro.test(resid(air_model2))
+# reject. normality assumption is suspected
 ```
 
 ```{r}
 # 13
+exp_model = lm(log(Ozone)~Temp, data=airquality)
+shapiro.test(resid(exp_model))
+# Fail to reject H_0, normallity assumption is not suspect
 ```
 
 ```{r}
 # 14
+exp_model = lm(log(Ozone)~Temp, data=airquality)
+p1 = predict(exp_model, newdata=data.frame(Temp=84), interval="prediction", level=.9)[3]
+exp(p1)
+# I have to undo log for prediction interval
 ```
 
 
 ```{r}
 # 15
+idx1 = which(fitted(exp_model) < 3.5)
+idx2 = which(fitted(exp_model) > 3.5)
+
+var(resid(exp_model)[idx1]) / var(resid(exp_model)[idx2])
 ```
-
-
-```{r}
-# 16
-```
-
