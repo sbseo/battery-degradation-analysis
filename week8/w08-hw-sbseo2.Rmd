@@ -83,7 +83,7 @@ data_3$y = with(data_3, 2 + 1 * x + rnorm(n = 40, sd = x))
 fit_3 = lm(y ~ x, data = data_3)
 ```
 
-```{r, eval = FALSE}
+```{r}
 diagnostics(fit_1, plotit = FALSE)$p_val
 diagnostics(fit_2, plotit = FALSE)$decision
 diagnostics(fit_1, testit = FALSE, pcol = "black", lcol = "black")
@@ -304,7 +304,79 @@ library(faraway)
 
 **(a)** Fit a simple linear regression with `loss` as the response and `Fe` as the predictor. Plot a scatterplot and add the fitted line. Check the assumptions of this model.
 
+```{r}
+corrosion_model = lm(loss~Fe, data=corrosion)
+
+
+plot(loss~Fe, data=corrosion, col="grey", main='Scatter plot')
+abline(corrosion_model, col="orange", lwd=3)
+par(mfrow=c(1,2))
+diagnostics(corrosion_model, testit = FALSE)
+bptest(corrosion_model)
+diagnostics(corrosion_model, plotit = FALSE)
+```
+
+All of the plots above show that the simple linear regression fitted to `Corrosion data` meet the following assumptions.
+
+
+From the first plot where y is `response` and x is `predictor`, it shows that this fitted model follows the `linear` assumption. The `fitted vs residuals plot` shows that `equal variance` assumption is satisified. The p-value of `BP test` also supports that the `equal variance` assumption is met. Finally, `normal qq plot` visualizes that `normal distribution` assumption is met.  `Shapriro test` also agrees with this decision.
+
 **(b)** Fit higher order polynomial models of degree 2, 3, and 4. For each, plot a fitted versus residuals plot and comment on the constant variance assumption. Based on those plots, which of these three models do you think are acceptable? Use a statistical test(s) to compare the models you just chose. Based on the test, which is preferred? Check the normality assumption of this model. Identify any influential observations of this model.
+
+```{r}
+corrosion_model2 = lm(loss~Fe + I(Fe^2), data=corrosion)
+coro_pval_2 = diagnostics(corrosion_model2)$p_val
+coro_bp_2 = bptest(corrosion_model2)$p.value
+```
+```{r}
+corrosion_model3 = lm(loss~Fe + I(Fe^2)+I(Fe^3), data=corrosion)
+coro_pval_3 = diagnostics(corrosion_model3)$p_val
+coro_bp_3 = bptest(corrosion_model3)$p.value
+
+```
+```{r}
+corrosion_model4 = lm(loss~Fe + I(Fe^2)+ I(Fe^3) + I(Fe^4), data=corrosion)
+coro_pval_4 = diagnostics(corrosion_model4)$p_val
+coro_bp_4 = bptest(corrosion_model4)$p.value
+```
+
+```{r}
+coro_df = data.frame(degree = c('2','3','4'),
+                  pval_variance = c(coro_bp_2, coro_bp_3, coro_bp_4),
+                  pval_normal = c(coro_pval_2, coro_pval_3, coro_pval_4))
+
+kable(coro_df)
+```
+
+$$H_0: Homoscedasticity$$
+$$H_1: Hetroscedasticity$$
+
+At $\alpha = 0.05$, the `p-vlaue` obtained from `bp-test` shows that the models of degree 2, 3, 4 all succeeds in meeting constant variance assumption. Therefore we do not reject the null hypothesis. All of the models are acceptable.
+
+$$H_0:\text{Normality assumption is not suspect}$$
+$$H_1:\text{Normality assumption is suspect}$$
+
+In addition, the `p-value` obtained from `Shapiro-Wilk normality test` shows that all of the model have an evidence to reject null hypothesis at $\alpha=0.05$. However, model 3 is most preferred becaused it shows very large `p-value` in `Shapiro-Wilk normality test`.
+
+```{r}
+# Cook's distance of the model of degree 2
+corrosion_cd = cooks.distance(corrosion_model2)
+idx1 = which(corrosion_cd > 4 / length(corrosion_cd))
+sum(corrosion_cd > 4 / length(corrosion_cd))
+
+# Cook's distance of the model of degree 3
+corrosion_cd = cooks.distance(corrosion_model3)
+sum(corrosion_cd > 4 / length(corrosion_cd))
+
+# Cook's distance of the model of degree 4
+corrosion_cd = cooks.distance(corrosion_model4)
+idx2 = which(corrosion_cd > 4 / length(corrosion_cd))
+sum(corrosion_cd > 4 / length(corrosion_cd))
+
+```
+
+It turns out that the model of degree 2 and degree 4 contain a highly influential observation. The index of this observations are `r idx1` and `r idx2` respectively.
+
 
 ***
 
@@ -318,7 +390,22 @@ library(ggplot2)
 
 **(a)** Fit a linear model with `price` as the response variable $y$, and `carat` as the predictor $x$. Return the summary information of this model.
 
+```{r}
+price_model = lm(price~carat, data=diamonds)
+summary(price_model)
+```
+
+
 **(b)** Plot a scatterplot of price versus carat and add the line for the fitted model in part **(a)**. Using a fitted versus residuals plot and/or a Q-Q plot, comment on the diagnostics. 
+
+```{r}
+plot(diamonds$carat, diamonds$price, col="grey", xlab='carat', ylab='price', main='Relationship between carat and price')
+abline(price_model, col='orange', lwd=3)
+
+diagnostics(price_model, testit = FALSE)
+```
+
+Scatter plot shows that `constant variable assumption` is violated. Fitted vs residual plot shows also supports that `constant variable assumption is violated`. Finally, normal Q-Q plot shows that `normal distribution assumption` is violated.
 
 
 **(c)** Seeing as the price stretches over several orders of magnitude, it seems reasonable to try a log transformation of the response. Fit a model with a logged response, plot a scatterplot of log-price versus carat and add the line for the fitted model, then use a fitted versus residuals plot and/or a Q-Q plot to comment on the diagnostics of the model.
@@ -327,8 +414,35 @@ library(ggplot2)
 qplot(price, data = diamonds, bins = 30)
 ```
 
+```{r}
+price_model_exp = lm(log(price)~carat, data=diamonds)
+
+plot(diamonds$carat, log(diamonds$price), col="grey", xlab='carat', ylab='log(price)', main='Relationship between carat and log(price)')
+abline(price_model_exp, col='orange', lwd=3)
+
+diagnostics(price_model_exp, testit = FALSE)
+
+```
+
+After log transformation on response, violation on both `same variance assumption` and `normal distribution assumption` have  mitigated. While the model now fits better, these two violations still exist. 
 
 **(d)** Try adding log transformation of the predictor. Fit a model with a logged response and logged predictor, plot a scatterplot of log-price versus log-carat and add the line for the fitted model, then use a fitted versus residuals plot and/or a Q-Q plot to comment on the diagnostics of the model.
 
+```{r}
+price_model_expexp = lm(log(price)~log(carat), data=diamonds)
+
+plot(log(diamonds$carat), log(diamonds$price), col="grey", xlab='log(carat)', ylab='log(price)', main='Relationship between log(carat) and log(price)')
+abline(price_model_expexp, col="orange", lwd=3)
+
+diagnostics(price_model_expexp, testit = FALSE)
+```
+
+After applying log transformation on predictor, the fitted line now almost perfectly fits the data. Plus, `fitted vs residuals` and `normal q-q plot` show that `contant variance assumption` and `normal distribution assumption` are mostly not suspect respectively. 
+
 **(e)** Use the model from part **(d)** to predict the price (in dollars) of a 3-carat diamond. Construct a 99% prediction interval for the price (in dollars).
 
+```{r}
+(answer = exp(predict(price_model_expexp, interval="prediction", level=.99, newdata=data.frame(carat = exp(3)))))
+```
+
+The prediction interval is `r answer[2]` ~ `r answer[3]`
