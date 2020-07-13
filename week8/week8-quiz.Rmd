@@ -58,7 +58,7 @@ pnorm(-12, -10, 3)
 model = lm(sr~., data=LifeCycleSavings)
 length(rstandard(model)[abs(rstandard(model)) < 2]) / length(rstandard(model))
 ```
-
+  
 ```{r}
 # 5
 which.max(rstandard(model))

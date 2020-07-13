@@ -1,6 +1,6 @@
 ---
 title: "Week 8 - Homework"
-author: "STAT 420, Summer 2020, D. Unger"
+author: "STAT 420, Summer 2020, Bruno Seo (sbseo2)"
 date: ''
 output:
   html_document: 
@@ -10,15 +10,6 @@ output:
 urlcolor: cyan
 ---
 
-
-# Directions
-
-Students are encouraged to work together on homework. However, sharing, copying or providing any part of a homework solution or code is an infraction of the University's rules on Academic Integrity. Any violation will be punished as severely as possible.
-
-- Be sure to remove this section if you use this `.Rmd` file as a template.
-- You may leave the questions in your final document.
-
-***
 
 ```{r setup, echo = FALSE, message = FALSE, warning = FALSE}
 options(scipen = 1, digits = 4, width = 80, fig.alin = "center")
@@ -45,6 +36,31 @@ The function should output:
     - A Normal Q-Q plot of the residuals that adds the appropriate line using `qqline()`. The points and line should be colored according to the input arguments. Be sure the plot has a title. 
 
 Consider using this function to help with the remainder of the assignment as well.
+
+```{r}
+diagnostics = function(model, pcol='grey', lcol='dodgerblue', alpha=.05, plotit=TRUE, testit=TRUE) {
+  
+  if (plotit) {
+    par(mfrow = c(1,2))
+    
+    plot(fitted(model), resid(model), col=pcol, main='Fitted vs residuals', ylab='Residuals', xlab='Fitted values')
+    abline(h=0, col=lcol, lwd=2)
+    
+    qqnorm(resid(model), col=pcol, main="Normal Q-Q plot")
+    qqline(resid(model), col=lcol, lwd=2)
+  }
+  
+  if (testit) {
+    p_val = shapiro.test(resid(model))$p.value
+    decision = "Fail to Reject"  
+    if (alpha > p_val){ decision = "Reject" }
+    
+    list(p_val=p_val, decision=decision)
+  }
+}
+
+```
+
 
 **(b)** Run the following code.
 
@@ -87,17 +103,94 @@ library(faraway)
 
 **(a)** Fit an additive multiple regression model with `lpsa` as the response and the remaining variables in the `prostate` dataset as predictors. Report the $R^2$ value for this model.
 
+```{r}
+prostate_model = lm(lpsa~., data=prostate)
+summary(prostate_model)$r.squared
+```
+
+
 **(b)** Check the constant variance assumption for this model. Do you feel it has been violated? Justify your answer.
+
+```{r}
+library(lmtest)
+bptest(prostate_model)$p.value
+```
+
+$$ H_0: \text{Homoscedasticity} $$
+$$ H_1: \text{Hetroscedasticity} $$
+
+No, constant variance assumption does not seem to be violated. 
+That is because bptest fails to reject null hypothesis at level $\alpha <= 0.25$.
 
 **(c)** Check the normality assumption for this model. Do you feel it has been violated? Justify your answer.
 
+```{r}
+diagnostics(prostate_model)
+```
+
+$$H_0: \text{Normality assumption is not suspect}$$
+$$H_1: \text{Normality assumption is suspect}$$
+
+Based on the Shapiro-Wilk normality test, I do not think normality assumption is violated. `p-value` is large enough not to reject null hypothesis. 
+
+In addition, `fitted vs residuals plot` shows the spread of the residuals are roughly the same.
+
+Finally, `normal q-q plot` shows that the points of the plot closely follow the straight line.
+
 **(d)** Check for any high leverage observations. Report any observations you determine to have high leverage.
+
+$$ h_i > 2\bar{h} $$
+We assume that high leverage values are those with greater than two times of mean leverage. 
+
+```{r}
+hatvalues(prostate_model)[hatvalues(prostate_model) > 2*mean(hatvalues(prostate_model))]
+```
+We have observed five observations above have high leverage. Note that these are the observations that have potential to have high influence.
 
 **(e)** Check for any influential observations. Report any observations you determine to be influential.
 
+$$D_i > \frac{4}{n}$$
+
+A cook's distance is often considered large if the condition above is met. 
+
+```{r}
+cooks.distance(prostate_model)[cooks.distance(prostate_model) > (4 / length(cooks.distance(prostate_model)))]
+```
+
+Above are the indices of observations that are highly influential. Note that visualization below shows that index number 39, 69, and 95 are repetitively found.
+
+```{r}
+par(mfrow=c(2,2))
+plot(prostate_model)
+```
+
+
 **(f)** Refit the additive multiple regression model without any points you identified as influential. Compare the coefficients of this fitted model to the previously fitted model.
 
+```{r}
+cd = cooks.distance(prostate_model)
+prostate_add_model = lm(lpsa~., data=prostate, subset= cd <= 4/length(cd))
+
+# Previously fitted model
+sum(coef(prostate_model))
+# New Fitted model without influential observations
+sum(coef(prostate_add_model))
+```
+
+The result shows that the sum of coefficients of new fitted model without influential observations are smaller than that of previously fitted model.
+
 **(g)** Create a data frame that stores the observations that were "removed" because they were influential. Use the two models you have fit to make predictions with these observations. Comment on the difference between these two sets of predictions.
+
+```{r}
+influenctial_idx = which(cooks.distance(prostate_model) > (4 / length(cooks.distance(prostate_model))))
+
+df_without_influential = prostate[-influenctial_idx, ]
+model_without_influential = lm(lpsa~., data=df_without_influential)
+
+all.equal(coef(prostate_add_model), coef(prostate_add_model))
+```
+Two addictive models have been used for comparison. One is an addictive model without modifying the original data. The other is an addictive model where the original data are modified
+The result turns out that these two models are exactly the same when it comes to prediction. That is because all of the coefficeints are exactly the same.
 
 ***
 
@@ -131,19 +224,25 @@ We now simulate `y_1` in a manner that does **not** violate any assumptions, whi
 ```{r}
 set.seed(83)
 library(lmtest)
-y_1 = 4 + 1 * x_1 + 0 * x_2 + rnorm(n = n, mean = 0, sd = 1)
-fit_1 = lm(y_1 ~ x_1 + x_2)
-bptest(fit_1)
+
+simulate_fit_1 = function(){
+  y_1 = 4 + 1 * x_1 + 0 * x_2 + rnorm(n = n, mean = 0, sd = 1)
+  fit_1 = lm(y_1 ~ x_1 + x_2)
+  summary(fit_1)$coefficients[3,4]
+}
 ```
 
 Then, we simulate `y_2` in a manner that **does** violate assumptions, which we again verify. In this case $\epsilon \sim N(0, \sigma = |x_2|).$
 
 ```{r}
 set.seed(83)
-y_2 = 4 + 1 * x_1 + 0 * x_2 + rnorm(n = n, mean = 0, sd = abs(x_2))
-fit_2 = lm(y_2 ~ x_1 + x_2)
-bptest(fit_2)
+simulate_fit_2 = function(){
+  y_2 = 4 + 1 * x_1 + 0 * x_2 + rnorm(n = n, mean = 0, sd = abs(x_2))
+  fit_2 = lm(y_2 ~ x_1 + x_2)
+  summary(fit_2)$coefficients[3,4]
+}
 ```
+
 
 **(a)** Use the following code after changing `birthday` to your birthday.
 
@@ -151,7 +250,7 @@ bptest(fit_2)
 num_sims = 2500
 p_val_1 = rep(0, num_sims)
 p_val_2 = rep(0, num_sims)
-birthday = 19081014
+birthday = 19891210
 set.seed(birthday)
 ```
 
@@ -163,10 +262,38 @@ Repeat the above process of generating `y_1` and `y_2` as defined above, and fit
 
 using both models, in the appropriate variables defined above. (You do not need to use a data frame as we have in the past. Although, feel free to modify the code to instead use a data frame.)
 
+```{r}
+for (i in 1:num_sims){
+  p_val_1[i] = simulate_fit_1()
+  p_val_2[i] = simulate_fit_2()
+}
+```
+
+
+
+
 **(b)** What proportion of the `p_val_1` values is less than 0.01? Less than 0.05? Less than 0.10? What proportion of the `p_val_2` values is less than 0.01? Less than 0.05? Less than 0.10? Arrange your results in a table. Briefly explain these results.
 
-***
+```{r}
+df_proportion = data.frame(
+                          alpha = c(0.01, 0.05, 0.10),
+                          p_val_1 = c(
+                          length(p_val_1[p_val_1 < 0.01]) / length(p_val_1),
+                          length(p_val_1[p_val_1 < 0.05]) / length(p_val_1),
+                          length(p_val_1[p_val_1 < 0.10]) / length(p_val_1)),
+                          p_val_2 = c(
+                          length(p_val_2[p_val_2 < 0.01]) / length(p_val_2),
+                          length(p_val_2[p_val_2 < 0.05]) / length(p_val_2),
+                          length(p_val_2[p_val_2 < 0.10]) / length(p_val_2)))
 
+
+library(knitr)
+kable(df_proportion)
+```
+
+Simulation result shows that we obtain the `p-values` for $\beta_2$ as expected. Since $\beta_2 = 0$, we expect roughly $1\%$ of the p-values to be significant at $\alpha=0.01$. The first model where variance assumption is not violated meets this expectation. However, the second model where the variance assumption is not satisfied fails to explain the signifance of $\beta_2$. In short, garbage-in, garbage-out.
+
+***
 ## Exercise 4 (Corrosion Data)
 
 For this exercise, we will use the `corrosion` data, which can be found in the `faraway` package. After loading the `faraway` package, use `?corrosion` to learn about this dataset.
