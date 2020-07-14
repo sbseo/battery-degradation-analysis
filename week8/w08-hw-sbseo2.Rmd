@@ -7,7 +7,7 @@ output:
     theme: readable
     toc: yes
   pdf_document: default
-urlcolor: cyan
+urlcolor: cyand
 ---
 
 
@@ -175,6 +175,7 @@ prostate_add_model = lm(lpsa~., data=prostate, subset= cd <= 4/length(cd))
 sum(coef(prostate_model))
 # New Fitted model without influential observations
 sum(coef(prostate_add_model))
+all.equal(coef(prostate_model), coef(prostate_add_model))
 ```
 
 The result shows that the sum of coefficients of new fitted model without influential observations are smaller than that of previously fitted model.
@@ -187,10 +188,12 @@ influenctial_idx = which(cooks.distance(prostate_model) > (4 / length(cooks.dist
 df_without_influential = prostate[-influenctial_idx, ]
 model_without_influential = lm(lpsa~., data=df_without_influential)
 
-all.equal(coef(prostate_add_model), coef(prostate_add_model))
+all.equal(predict(prostate_model, newdata=df_without_influential) ,
+predict(model_without_influential,newdata=df_without_influential))
 ```
-Two addictive models have been used for comparison. One is an addictive model without modifying the original data. The other is an addictive model where the original data are modified
-The result turns out that these two models are exactly the same when it comes to prediction. That is because all of the coefficeints are exactly the same.
+Two addictive models have been used for comparison. One is an addictive model where highly influential observations are **not removed**. The other is an addictive model where highly influential observations are **removed**.
+The result turns out that the mean relative difference between the two predictions set is not huge.
+
 
 ***
 
@@ -356,7 +359,7 @@ At $\alpha = 0.05$, the `p-vlaue` obtained from `bp-test` shows that the models 
 $$H_0:\text{Normality assumption is not suspect}$$
 $$H_1:\text{Normality assumption is suspect}$$
 
-In addition, the `p-value` obtained from `Shapiro-Wilk normality test` shows that all of the model have an evidence to reject null hypothesis at $\alpha=0.05$. However, model 3 is most preferred becaused it shows very large `p-value` in `Shapiro-Wilk normality test`.
+In addition, the `p-value` obtained from `Shapiro-Wilk normality test` shows that all of the model have an evidence to reject null hypothesis at $\alpha=0.05$. However, **model 3 is most preferred** becaused it shows very large `p-value` in `Shapiro-Wilk normality test`.
 
 ```{r}
 # Cook's distance of the model of degree 2
@@ -368,11 +371,11 @@ sum(corrosion_cd > 4 / length(corrosion_cd))
 corrosion_cd = cooks.distance(corrosion_model3)
 sum(corrosion_cd > 4 / length(corrosion_cd))
 
+
 # Cook's distance of the model of degree 4
 corrosion_cd = cooks.distance(corrosion_model4)
 idx2 = which(corrosion_cd > 4 / length(corrosion_cd))
 sum(corrosion_cd > 4 / length(corrosion_cd))
-
 ```
 
 It turns out that the model of degree 2 and degree 4 contain a highly influential observation. The index of this observations are `r idx1` and `r idx2` respectively.
@@ -442,7 +445,7 @@ After applying log transformation on predictor, the fitted line now almost perfe
 **(e)** Use the model from part **(d)** to predict the price (in dollars) of a 3-carat diamond. Construct a 99% prediction interval for the price (in dollars).
 
 ```{r}
-(answer = exp(predict(price_model_expexp, interval="prediction", level=.99, newdata=data.frame(carat = exp(3)))))
+(answer = exp(predict(price_model_expexp, interval="prediction", level=.99, newdata=data.frame(carat = 3))))
 ```
 
 The prediction interval is `r answer[2]` ~ `r answer[3]`
