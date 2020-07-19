@@ -1,0 +1,112 @@
+---
+title: "w09-quiz"
+author: "Bruno Seo"
+date: "7/19/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+# 1
+all_model = lm(mpg~., data=mtcars)
+max(car::vif(all_model))
+```
+
+
+```{r}
+# 2
+summary(all_model)$adj.r.squared
+```
+
+
+```{r}
+# 3
+calc_loocv_rsme = function(model){
+  sqrt(mean((resid(model) / (1-hatvalues(model)))^2))
+}
+
+calc_loocv_rsme(all_model)
+```
+
+```{r}
+# 4
+aic_model = step(all_model, direction = 'backward')
+```
+
+```{r}
+# 5
+calc_loocv_rsme(aic_model)
+```
+
+```{r}
+# 6
+max(car::vif(aic_model))
+```
+
+```{r}
+# 7
+car::vif(all_model)
+car::vif(aic_model)
+calc_loocv_rsme(all_model)
+calc_loocv_rsme(aic_model)
+# The selected model is better for predicting and does not have collinearity issue
+```
+
+```{r}
+# 8
+model_start = lm(mpg~1, data=mtcars)
+bic_model = step(model_start, scope=mpg~cyl+disp+hp+drat+wt+qsec+vs+am+gear+carb, direction='forward', k=log(n))
+bic_model
+```
+
+```{r}
+# 9
+calc_loocv_rsme(bic_model)
+```
+
+```{r}
+# 10 #make sure to do with resid
+?LifeCycleSavings
+life_full_model = lm(sr ~ . -ddpi, data=LifeCycleSavings)
+life_ddpi_model = lm(ddpi ~ . -sr, data=LifeCycleSavings)
+cor(resid(life_ddpi_model), resid(life_full_model))
+```
+
+```{r}
+# 11
+life_twoway_model = lm(sr~ .*., data=LifeCycleSavings)
+life_twoway_model
+summary(life_twoway_model)$adj.r.squared
+```
+
+```{r}
+# 12
+step(life_twoway_model, direction = "backward", k=log(n))
+```
+
+```{r}
+# 13
+life_aic_model = step(life_twoway_model, direction = "backward")
+```
+
+```{r}
+# 14
+life_add_model = lm(sr ~ . , data=LifeCycleSavings)
+max(
+calc_loocv_rsme(life_twoway_model),
+calc_loocv_rsme(life_aic_model),
+calc_loocv_rsme(life_add_model))
+```
+
+
+```{r}
+# 15
+max(
+summary(life_twoway_model)$adj.r.squared,
+summary(life_aic_model)$adj.r.squared,
+summary(life_add_model)$adj.r.squared)
+```
