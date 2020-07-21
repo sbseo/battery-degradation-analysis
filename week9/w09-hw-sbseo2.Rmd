@@ -246,7 +246,7 @@ get_bp_decision(mod_a, alpha = 0.01)
 get_num_params(mod_a)
 ```
 
-The proposed model is carfully chosen by using three main strategies. The first strategy used is transformation of predictors. The proposed model shows that using 2nd order transformation is sufficient to meet the requirement.The second strategy used is outlier elimination. Outlier elimination is done by using cook's distance where it has high influence. Finally, three-way interaction is used for modelling.
+The proposed model is carfully chosen by using three main strategies. The first strategy used is transformation of predictors. The proposed model shows that using 2nd order transformation is sufficient to meet the requirement. Outlier elimination is used as the second strategy. Outlier elimination is done by eliminating data whose cook's distance indicate high influence. Finally, three-way interaction is used for modelling.
 
 **(b)** Find another "good" model for `balance` using the available predictors. Use any methods seen in class except transformations of the response. The model should:
 
@@ -369,7 +369,7 @@ abline(a=0,b=1, lwd=2, col='darkorange')
 ```
 
 
-The result shows that the trained model is quite useful for prediction. While the average percent error is not as low as 0, the plot shows that there is a strong similarity between predicted values and actual values.
+The result shows that the trained model is quite useful for prediction. While the average percent error is not as low as 0, the plot shows that there is some similarity between predicted values and actual values.
 
 ***
 
