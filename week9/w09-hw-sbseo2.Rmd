@@ -84,13 +84,13 @@ cor(resid(employed_model), resid(pop_model))
 **(e)** Fit a new model with `Employed` as the response and the predictors from the model in **(b)** that were significant. (Use $\alpha = 0.05$.) Calculate and report the variance inflation factor for each of the predictors. Which variable has the largest VIF? Do any of the VIFs suggest multicollinearity?
 
 ```{r}
-e_model = lm(Employed ~ GNP.deflator + GNP + Unemployed + Population + Year, data=longley)
-vif_gnp = car::vif(e_model)[2]
+e_model = lm(Employed ~ Unemployed + Armed.Forces + Year, data=longley)
+vif_gnp = car::vif(e_model)[3]
 car::vif(e_model)
 ```
 
 
-`GNP` has the largest VIF and its value equals to `r vif_gnp`. Since all of the VIFs are larger than 4, all of the predictors indicate multicollinearity. 
+`Year` has the largest VIF and its value equals to `r vif_gnp`. Since all of the VIFs are smaller than 4, all of the predictors do not indicate multicollinearity. 
 
 **(f)** Use an $F$-test to compare the models in parts **(b)** and **(e)**. Report the following:
 
@@ -109,7 +109,7 @@ anova(e_model, b_model)$F[2]
 
 - The distribution of the test statistic under the null hypothesis
 
-F distribution where degree of freedom is 1
+F distribution where degree of freedom is 3
 
 - The p-value
 ```{r}
@@ -118,11 +118,11 @@ anova(e_model, b_model)$"Pr(>F)"[2]
 
 - A decision
 
-Since $\alpha > \text{p-value}$, there is signicant amount of evidence to reject null hypothesis.
+Since $\alpha < \text{p-value}$, there is signicant amount of evidence not to reject null hypothesis.
 
 - Which model you prefer, **(b)** or **(e)**
 
-We prefer the model from **(b)**
+We prefer the model from **(e)**
 
 **(g)** Check the assumptions of the model chosen in part **(f)**. Do any assumptions appear to be violated?
 
@@ -140,7 +140,7 @@ plot_qq = function(model, pointcol = "dodgerblue", linecol = "darkorange") {
 }
 ```
 
-```{r, results=FALSE, echo=FALSE}
+```{r, message=FALSE}
 library(lmtest)
 ```
 
@@ -304,7 +304,7 @@ The proposed model passes all four requirements given in the question. The model
 
 For this exercise, use the `Sacramento` data from the `caret` package. Use the following code to perform some preprocessing of the data.
 
-```{r}
+```{r , message=FALSE}
 library(caret)
 library(ggplot2)
 data(Sacramento)
@@ -478,7 +478,7 @@ Note that in both cases, you could `sum()` the result to obtain the number of fa
 Calculate the rate of false positives and negatives for both AIC and BIC. Compare the rates between the two methods. Arrange your results in a well formatted table.
 
 
-```{r, results=FALSE}
+```{r, message=FALSE, results=FALSE}
 set.seed(19891210)
 
 fn_aic = rep(-1, 300)
@@ -497,11 +497,11 @@ for (i in 1:300){
   aic_model = step(full_model, direction="backward")
   bic_model = step(full_model, direction="backward", k = log(n))
   
-  fn_aic[i] = mean(!(signif %in% names(coef(aic_model)))) 
-  fp_aic[i] = mean(names(coef(aic_model)) %in% not_sig)
+  fn_aic[i] = sum(!(signif %in% names(coef(aic_model)))) 
+  fp_aic[i] = sum(names(coef(aic_model)) %in% not_sig)
   
-  fn_bic[i] = mean(!(signif %in% names(coef(bic_model))))
-  fp_bic[i] = mean(names(coef(bic_model)) %in% not_sig)
+  fn_bic[i] = sum(!(signif %in% names(coef(bic_model))))
+  fp_bic[i] = sum(names(coef(bic_model)) %in% not_sig)
   }
 ```
 
@@ -526,7 +526,7 @@ kable(df)
 
 Calculate the rate of false positives and negatives for both AIC and BIC. Compare the rates between the two methods. Arrange your results in a well formatted table. Also compare to your answers in part **(a)** and suggest a reason for any differences.
 
-```{r, results=FALSE}
+```{r, message=FALSE,results=FALSE}
 set.seed(94)
 x_1  = runif(n, 0, 10)
 x_2  = runif(n, 0, 10)
@@ -556,11 +556,11 @@ sim_data_2 = data.frame(x_1, x_2, x_3, x_4, x_5, x_6, x_7, x_8, x_9, x_10,
   aic_model_b = step(full_model_b, direction="backward")
   bic_model_b = step(full_model_b, direction="backward", k = log(n))
   
-  fn_aic_b[i] = mean(!(signif %in% names(coef(aic_model_b)))) 
-  fp_aic_b[i] = mean(names(coef(aic_model_b)) %in% not_sig)
+  fn_aic_b[i] = sum(!(signif %in% names(coef(aic_model_b)))) 
+  fp_aic_b[i] = sum(names(coef(aic_model_b)) %in% not_sig)
   
-  fn_bic_b[i] = mean(!(signif %in% names(coef(bic_model_b))))
-  fp_bic_b[i] = mean(names(coef(bic_model_b)) %in% not_sig)
+  fn_bic_b[i] = sum(!(signif %in% names(coef(bic_model_b))))
+  fp_bic_b[i] = sum(names(coef(bic_model_b)) %in% not_sig)
 }
 ```
 
@@ -575,6 +575,7 @@ kable(df_b)
 ```
 
 
-**Should be updated..**
+
+The difference of the result between the two models is due to the differences in $x_8, x_9, x_{10}$. Since the second true model is larger than the first true model, the second simulation resulted in higher scores.
 
 

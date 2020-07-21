@@ -96,7 +96,7 @@ life_aic_model = step(life_twoway_model, direction = "backward")
 ```{r}
 # 14
 life_add_model = lm(sr ~ . , data=LifeCycleSavings)
-max(
+min(
 calc_loocv_rsme(life_twoway_model),
 calc_loocv_rsme(life_aic_model),
 calc_loocv_rsme(life_add_model))
