@@ -1,7 +1,7 @@
 ---
 title: "w10-quiz"
 author: "Bruno Seo"
-date: "7/24/2020"
+date: "7/26/2020"
 output: html_document
 ---
 
@@ -12,69 +12,152 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r}
 # 1
+log_odds = -3 + 1*-1 +2*.5 + 3*.25
+mean = 1 / (1+exp(log_odds))
+
+mean
+
 ```
 
 
 ```{r}
 # 2
+car_model = glm(am~mpg+hp+qsec, data=mtcars, family="binomial")
+coef(car_model)['qsec']
+
 ```
 
 
 ```{r}
 # 3
+coef(car_model)['mpg']
 ```
 
 ```{r}
 # 4
+predict(car_model, newdata = data.frame(mpg =19, hp=150, qsec=19))
 ```
 
 ```{r}
 # 5
+# This questions is not asking the log-odds. It is asking the response!
+predict(car_model, newdata = data.frame(mpg =22, hp=123, qsec=18), type="response")
 ```
 
 ```{r}
 # 6
+null_model = glm(am~1 , data=mtcars, family="binomial")
+anova(null_model, car_model, test="LRT")$Deviance[2]
+
 ```
 
 ```{r}
 # 7
+summary(car_model)$coefficients['hp', 'Pr(>|z|)']
+
 ```
 
 ```{r}
 # 8
+library(MASS)
+
+pima_model = glm(type~glu+ped+I(glu^2)+I(ped^2)+glu:ped, data=Pima.tr, family="binomial")
+coef(pima_model)
+coef(pima_model)[4]
+
+# First attempt -0.0001796503 
+# Final attempt -0.3595625569
 ```
 
 ```{r}
 # 9
+mean(predict(pima_model, newdata = Pima.te, type="response") > .8)
+
 ```
 
 ```{r}
 # 10
+# How many predictors are used!? 
+# The number of predictors and parameters are different
+pima_add_model = glm(type~. , data=Pima.tr, family="binomial")
+aic_model = step(pima_add_model, direction="backward", trace=0)
+coef(aic_model)
+length(coef(aic_model)) -1
 ```
 
 ```{r}
 # 11
+pima_twoway_model = glm(type~ .*., data=Pima.tr, family="binomial")
+aic_twoway = step(pima_twoway_model, direction="backward", trace=0)
+deviance(aic_twoway)
 ```
 
 ```{r}
 # 12
+library(MASS)
+library(boot)
+
+# fit the models here
+pima_model = glm(type~glu+ped+I(glu^2)+I(ped^2)+glu:ped, data=Pima.tr, family="binomial")
+pima_add_model = glm(type~. , data=Pima.tr, family="binomial")
+aic_model = step(pima_add_model, direction="backward", trace=0)
+pima_twoway_model = glm(type~ .*., data=Pima.tr, family="binomial")
+aic_twoway = step(pima_twoway_model, direction="backward", trace=0)
+
+set.seed(42)
+cv.glm(Pima.tr, pima_model, K=5)$delta[1]
+
+set.seed(42)
+cv.glm(Pima.tr, pima_add_model, K=5)$delta[1]
+
+set.seed(42)
+cv.glm(Pima.tr, aic_model, K=5)$delta[1]
+
+set.seed(42)
+cv.glm(Pima.tr, pima_twoway_model, K=5)$delta[1]
+
+set.seed(42)
+cv.glm(Pima.tr, aic_twoway, K=5)$delta[1]
+
+# 0.1607368
+# 0.1597213
 ```
 
 ```{r}
 # 13
+pima_add_model = glm(type~. , data=Pima.tr, family="binomial")
+mean(ifelse(predict(pima_add_model, newdata=Pima.te, type='response') > 0.5, "Yes", "No") != Pima.te$type)
+
+# first attempt 0.2680723
+# second attempt 0.4638554
+# Final attempt 0.1987952
 ```
 
 ```{r}
 # 14
+pima_add_predicted = ifelse(predict(pima_add_model, newdata=Pima.te, type="response") > .5, "Yes", "No")
+make_conf_mat = function(predicted, actual){
+  table(predicted = predicted, actual = actual)
+}
+table = make_conf_mat(predicted=pima_add_predicted , actual=Pima.te$type)
+# Sensitivity: True positive rate
+# (TP) / (TP+FN)
+# P / (TP+FN)
+
+table
+table[2,2] / sum(table[,2])
 ```
 
 
 ```{r}
 # 15
-```
+pima_add_predicted = ifelse(predict(pima_add_model, newdata=Pima.te, type="response") > .3, "Yes", "No")
+make_conf_mat = function(predicted, actual){
+  table(predicted = predicted, actual = actual)
+}
+table = make_conf_mat(predicted=pima_add_predicted , actual=Pima.te$type)
+table
+table[2,2] / sum(table[,2])
 
-
-```{r}
-# 16
 ```
 
