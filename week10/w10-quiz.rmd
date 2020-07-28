@@ -63,7 +63,7 @@ library(MASS)
 
 pima_model = glm(type~glu+ped+I(glu^2)+I(ped^2)+glu:ped, data=Pima.tr, family="binomial")
 coef(pima_model)
-coef(pima_model)[4]
+coef(pima_model)[5]
 
 # First attempt -0.0001796503 
 # Final attempt -0.3595625569

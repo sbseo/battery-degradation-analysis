@@ -107,6 +107,11 @@ curve(dnorm(x, mean = 0, sd = 1),
 (wt_stat = mean(beta_2_statistic > 1))
 ```
 
+```{r}
+pnorm(1, 0, 1, lower.tail=FALSE)
+```
+
+
 The probability of observing a test statistic larger than 1 equals to `r wt_stat` and its probability follows standard normal distribution.
 
 **(d)** Plot a histogram of the empirical values for the likelihood ratio test statistic. Overlay the density of the true distribution assuming a large sample.
@@ -123,6 +128,10 @@ curve(dchisq(x,df = 2),
 
 ```{r}
 (lrt_stat = mean(lrt_statistic > 5))
+```
+
+```{r}
+pchisq(5, 2, lower.tail = FALSE)
 ```
 
 This probability equals to `r lrt_stat` and it follows $\chi^2$ distribution where degree of freedom equals to 2.
@@ -171,6 +180,7 @@ curve(dnorm(x, mean = 0, sd = 1),
 
 # c
 mean(beta_2_statistic > 1)
+pnorm(1, 0, 1, lower.tail=FALSE)
 
 # d
 hist(lrt_statistic, main="Empirical values for likelihood ratio test statistic (sample size = 10)", col = "lightgrey", xlab="Value", prob=TRUE)
@@ -180,6 +190,7 @@ curve(dchisq(x,df = 2),
 
 # e
 mean(lrt_statistic > 5)
+pchisq(5, 2, lower.tail = FALSE)
 
 ```
 
@@ -438,11 +449,10 @@ cancer_sp[i] = table[1,1] / (table[1,1] + table[2,1])
 
 
 ```{r}
-plot(cutoffs, cancer_sens, type="b", lty=1, col="dodgerblue", ylab="value", main="Sensitivity/Specificity vs Cuttoffs")
+plot(cutoffs, cancer_sens, type="b", lty=1, col="dodgerblue", ylab="value", main="Sensitivity/Specificity vs Cutoffs")
 lines(cutoffs, cancer_sp, type='b', lty=2, col="darkorange")
 legend("topright", legend=c("Sensitivity", "Specificity"), col=c("dodgerblue", "darkorange"), lty=1:2, cex=0.8)
 ```
 
-Approximately, `0.8` seems to be ideal for $c$. That is because this value is the point where true positive rate and true negative rate equal to each other.
-
+`0.5` seems to be ideal for $c$. Since sensitivity and specificity are tradeoff, there is no way to make both metric larger at the same time. Therefore, there is no one-fit-all cutoff value to make both sensitivity and specificity larger. Therefore, we typically use `0.5` which is the mean of possible cutoff values. 
 
