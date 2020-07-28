@@ -66,6 +66,8 @@ Store the test statistics for two tests:
 
 
 ```{r}
+set.seed(120)
+
 beta_0 = 0.4
 beta_1 = -0.35
 model = beta_0 + beta_1*x1
@@ -407,9 +409,9 @@ rate_df = data.frame(
 kable(rate_df)
 ```
 
-Based on 5-fold-cross-validation, three vairable model with `radius, smoothness` and `texture` is chosen as the best model. Its test misclassification rate is `r min(rate_df$Testing)`.
+Based on 5-fold-cross-validation, `three variable model` with `radius, smoothness` and `texture` is chosen as the `best model`. Its test misclassification rate is `r min(rate_df$Testing)`.
 
-The full addictive model and AIC model are over fitting. While the training missclassifcation rate shows near zero misclassifcation rate, the testing misclassication rate is relatively much higher. That is because this model is capturing the noise rather than capturing the reality.
+The full addictive model and AIC model are overfitting. While the training missclassifcation rate shows near zero misclassifcation rate, the testing misclassication rate is relatively much higher. That is because this model is capturing the noise rather than capturing the reality.
 
 
 **(b)** In this situation, simply minimizing misclassifications might be a bad goal since false positives and false negatives carry very different consequences. Consider the `M` class as the "positive" label. Consider each of the probabilities stored in `cutoffs` in the creation of a classifier using the **additive** model fit in **(a)**.
