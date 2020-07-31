@@ -49,66 +49,103 @@ coef(model_5)[3]
 
 # Quiz
 
-
 ```{r}
 # 1
+library(MASS)
+model_simple = lm(Hwt~Bwt, data=cats)
+model_add = lm(Hwt~Bwt+Sex, data=cats)
+model_int = lm(Hwt~Bwt*Sex, data=cats)
+
+coef(model_simple)[2]
 ```
 
 
 ```{r}
 # 2
+coef(model_int)[2]
 ```
 
 
 ```{r}
 # 3
+coef(model_int)[2]+coef(model_int)[4]
 ```
 
 ```{r}
-# 4
+# 4 Needs to be checked
+coef(model_add)[3]
+predict(model_add, newdata=data.frame(Bwt=2, Sex='M')) - predict(model_add, newdata=data.frame(Bwt=1, Sex='M')) 
+
+predict(model_add, newdata=data.frame(Bwt=2, Sex='F')) - predict(model_add, newdata=data.frame(Bwt=1, Sex='F')) 
 ```
 
 ```{r}
 # 5
+anova(model_add, model_int)$F[2]
 ```
 
 ```{r}
 # 6
+anova(model_add, model_int)
 ```
 
 ```{r}
 # 7
+iris_add = lm(Sepal.Length ~ Petal.Length + Species, data = iris)
+predict(iris_add, newdata= data.frame(Petal.Length=5.10, Species='versicolor'))
 ```
 
 ```{r}
 # 8
+confint(iris_add, level=.9)[4,1]
 ```
 
 ```{r}
 # 9
+null_model= lm(Sepal.Length ~ Petal.Length, data = iris)
+anova(null_model, iris_add)$F[2]
 ```
 
 ```{r}
 # 10
+iris_int = lm(Sepal.Length ~ Petal.Length * Species, data = iris)
+length(coef(iris_int))
 ```
 
 ```{r}
 # 11
+predict(iris_int, interval="prediction", level=.99, newdata=data.frame(Petal.Length=5.10, Species="versicolor"))[3]
+       
 ```
 
 ```{r}
 # 12
+coef(iris_int)
+coef(iris_int)[2]+coef(iris_int)[5]
+
 ```
 
 ```{r}
 # 13
+anova(iris_add, iris_int)
 ```
 
 ```{r}
 # 14
+swiss_model = lm(Fertility~Education+Catholic+Infant.Mortality, data=swiss)
+swiss_model_two = lm(Fertility~(Education+Catholic+Infant.Mortality)^2, data=swiss)
+swiss_model_three = lm(Fertility~Education*Catholic*Infant.Mortality, data=swiss)
+
+predict(swiss_model_three, newdata=data.frame(Education=3, Catholic=90, Infant.Mortality=20)) - predict(swiss_model_three, newdata=data.frame(Education=2, Catholic=90, Infant.Mortality=20))
 ```
 
 
 ```{r}
-# 15
+# 15 ????
+anova(swiss_model_two, swiss_model_three)$"Pr(>F)"[2]
 ```
+
+
+
+
+
