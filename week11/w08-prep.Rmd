@@ -1,0 +1,155 @@
+---
+title: "w08-exam practice"
+author: "Bruno Seo"
+date: "7/30/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Practice quiz
+
+```{r}
+# 1
+m = 5-2*3
+sd = sqrt(3/4)
+pnorm(1, m, sd, lower.tail=FALSE)
+```
+
+
+```{r}
+# 2
+quiz_data = data.frame(y=c(1,2,3), x=c(1,2,3))
+model = lm(y~x, data=quiz_data)
+idx = which.max(hatvalues(model))
+cooks.distance(model)[idx]
+```
+
+
+```{r}
+# 3
+model = lm(y~x, data=quiz_data)
+shapiro.test(resid(model))$p.value
+```
+
+```{r}
+# 4
+model = lm(log(y)~x+x^2, data=quiz_data)
+shapiro.test(resid(model))$p.value
+```
+
+```{r}
+# 5
+model = lm(log(y)~x+x^2, data=quiz_data)
+sum((exp(fitted(model)) - quiz_data$y)^2)
+```
+
+
+# Quiz
+
+```{r}
+# 1
+model1 = lm(y~x, data=data_1)
+model2 = lm(y~x, data=data_2)
+
+shapiro.test(resid(model1))
+shapiro.test(resid(model2))
+```
+
+
+```{r}
+# 2
+data_1 = data.frame(y=1, x=1)
+data_2 = data.frame(y=1, x=1)
+model1 = lm(y~x, data=data_1)
+model2 = lm(y~x, data=data_2)
+library(lmtest)
+bptest(model1)
+bptest(model2)
+
+plot(fitted(model1), resid(model1))
+```
+
+
+```{r}
+# 3
+mean = 2+ 4*-3
+sd = 3
+pnorm(-12, mean, sd)
+```
+
+```{r}
+# 4
+life_model = lm(sr~., data=LifeCycleSavings)
+mean(abs(rstandard(life_model)) < 2)
+```
+
+```{r}
+# 5
+which.max(abs(rstandard(life_model)))
+```
+```{r}
+# 6
+sum(hatvalues(life_model) > 2 * mean(hatvalues(life_model)))
+```
+
+```{r}
+# 7
+which.max(hatvalues(life_model))
+```
+
+```{r}
+# 8
+max(cooks.distance(life_model))
+```
+
+```{r}
+# 9
+cd = cooks.distance(life_model)
+life_model_small = lm(sr~., data=LifeCycleSavings, subset=cd < (4 / length(cd)))
+sum(coef(life_model_small))
+```
+
+```{r}
+# 10
+airquality = na.omit(airquality)
+
+air_model = lm(Ozone~Temp+I(Temp^2), data=airquality)
+summary(air_model)$coefficients[3, 'Pr(>|t|)']
+```
+
+```{r}
+# 11
+air_model_four = lm(Ozone~Temp+I(Temp^2)+I(Temp^3)+I(Temp^4), data=airquality)
+anova(air_model, air_model_four)$'Pr(>F)'[2]
+```
+
+```{r}
+# 12
+shapiro.test(resid(air_model_four))$p.value
+```
+
+```{r}
+# 13
+air_model_y = lm(log(Ozone)~Temp, data=airquality)
+# shapiro.test(exp(fitted(air_model_y)) - airquality$Ozone)
+shapiro.test(resid(air_model_y))
+```
+
+```{r}
+# 14
+exp(predict(air_model_y, newdata=data.frame(Temp = 84), interval="prediction", level=.9)[3])
+```
+
+
+```{r}
+# 15
+var(resid(air_model_y)[which(fitted(air_model_y) < 3.5)]) / var(resid(air_model_y)[which(fitted(air_model_y) > 3.5)])
+
+# residual = exp(fitted(air_model_y)) - airquality$Ozone
+# var(residual[which(fitted(air_model_y) < 3.5)]) / var(residual[which(fitted(air_model_y) > 3.5)])
+
+
+```
