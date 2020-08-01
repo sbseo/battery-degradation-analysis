@@ -34,16 +34,48 @@
 - Standardized residuals: rstandard(model)
 
 - Don't confuse. life_model vs life_model_small
-
 - coef: estimates for parameters vs pvalue: summary(model)$coefficients
-
 - Use $\frac{4}{n}$ as the cutoff for labeling an observation influential => subset=cd < 4/n
-
 - When dealing with $y$ transformation, $\hat{y} == exp(fitted(model))$ 
-
 - Shakiro.test(resid(model)). Residual is resid(model)
+- 9 14
 
-  
+# Week9
 
-9 14
+- **Partial correlation coefficient** ex) cor(resid(model1), resid(model2))
+
+  Model1 = regressing response against all of the predictors except the predictor of interest
+
+  Model2 = regressing the predictor of interest against the other predictors
+
+- Vif: library(car)
+
+- R squared: 1/(1-r_squared)
+
+  You get the r_squared from the model where x5 is the response and the rest of the predictors as the predictors
+
+- AIC(model1, model2) -> find small AIC
+
+- $R^2$ VS Adjusted $R^2$
+
+practice_quiz: 1,3,4
+
+Quiz: 1,6
+
+- What is the largest variance inflation factor? => It requires the value. Not the name of the factor
+- 
+
+
+
+One semester
+
+cs445
+
+
+
+Two semesters
+
+cs445, cs446, cs598 
+
+
 
