@@ -67,6 +67,18 @@ Quiz: 1,6
 
 
 
+# Week 10
+
+- Log odds vs response
+- Estimate the log-odds that a car vs estimate the probability that a car
+  => predict() vs predict(type="response")
+- How may predictor are used in this reduced model? Vs How may predictors are reduced in this reduced model?
+- cv.glm(k=5)
+
+5,9,10,11,12,14,15
+
+
+
 One semester
 
 cs445
