@@ -4,13 +4,15 @@
 
 - Numerical variable vs categorical variable(as.factor)
 
-  for a dose increase of 1 milligram per day : change slope of dose
+  **for a dose increase of 1 milligram per day : change slope of dose**
 
 - OJ == orange juice
 
-  Ascorbic acid == VC
+  **Ascorbic acid == VC**
 
-- Difference between a and b ->  a-b
+- **Difference between** **a and b** ::  a - b
+
+2,5
 
 ## Quiz
 
@@ -22,7 +24,17 @@
 
 - Always calculate from the web R 
 
+  **99% prediction level** == **level=.99 not level=.9**
 
+11, 14
+
+obtain an estimate of the change in mean sepal length for a petal length increase of 1 unit, for a versicolor.
+
+`coef(iris_int)[2]+coef(iris_int)[5]`
+
+Use this model to estimate the change in mean **Fertility** for an increase of **Education**of one unit when **Catholic** is 90.0 and **Infant.Mortality** is 20.0.
+
+`predict(swiss_model_three, newdata=data.frame(Education=3, Catholic=90, Infant.Mortality=20)) - predict(swiss_model_three, newdata=data.frame(Education=2, Catholic=90, Infant.Mortality=20))`
 
 # Week8
 
@@ -31,11 +43,11 @@
 - lm(y~x^2) (X) 
   ***lm(y~I(x^2)) (O)***
 
-- Standardized residuals: rstandard(model)
+- **Standardized residuals**: rstandard(model)
 
 - Don't confuse. life_model vs life_model_small
 - coef: estimates for parameters vs pvalue: summary(model)$coefficients
-- Use $\frac{4}{n}$ as the cutoff for labeling an observation influential => subset=cd < 4/n
+- Use $\frac{4}{n}$ as the cutoff for labeling an observation influential => **subset=cd < 4/n**
 - When dealing with $y$ transformation, $\hat{y} == exp(fitted(model))$ 
 - Shakiro.test(resid(model)). Residual is resid(model)
 - 9 14
@@ -71,11 +83,15 @@ Quiz: 1,6
 
 - Log odds vs response
 - Estimate the log-odds that a car vs estimate the probability that a car
-  => predict() vs predict(type="response")
+  => predict() vs predict**(type="response")**
 - How may predictor are used in this reduced model? Vs How may predictors are reduced in this reduced model?
 - cv.glm(k=5)
+- Sensitivity: True positive rate
+- Specificity: True negative rate
 
 5,9,10,11,12,14,15
+
+
 
 
 
