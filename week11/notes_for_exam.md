@@ -1,3 +1,5 @@
+Write till hundredth
+
 # week7
 
 ## Practice quiz
@@ -71,13 +73,25 @@ Use this model to estimate the change in mean **Fertility** for an increase of *
 - $R^2$ VS Adjusted $R^2$
 
 practice_quiz: 1,3,4
+practice_quiz: 2,3
+
+ **Report the RSS of the preferred model.**
+
+
+
+**0 / 1 point**
 
 Quiz: 1,6
 
 - What is the largest variance inflation factor? => It requires the value. Not the name of the factor
 - 
 
+Quiz: 7, 9
 
+Full model vs selected model
+
+BIC Model: k=log(fitted(model)) (X). 
+					k=log(length(fitted(model))) (O)
 
 # Week 10
 
@@ -88,8 +102,6 @@ Quiz: 1,6
 - cv.glm(k=5)
 - Sensitivity: True positive rate
 - Specificity: True negative rate
-
-5,9,10,11,12,14,15
 
 
 
