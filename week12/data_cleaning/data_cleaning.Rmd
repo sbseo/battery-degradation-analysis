@@ -1,0 +1,142 @@
+---
+title: "Data Cleaning"
+author: "Sara Kohtz"
+date: "August 3, 2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Read in the three batteries, and combine them.
+
+```{r}
+library(readr)
+
+data7 = read.csv("B7_reorganized_data.csv")
+data30 = read.csv("B30_reorganized_data.csv")
+data48 = read.csv("B48_reorganized_data.csv")
+
+data_full = rbind(data7,data30,data48)
+```
+
+Right now, we can look only at the data from discharging. The following is the full dataset (all three batteries) but just with the discharge type. 
+
+```{r}
+data_full_discharge = data_full[data_full$charge_type=="Discharge",]
+```
+
+It is clear that the capacity changes at a macro rate (we see the change at the end of each cycle); so it is advantageous to set up the data in terms of cycle. In this case, we summarize the data for the cycle in the following ways: maximum temperature during the cycle, total time of the cycle
+
+```{r}
+#extract number of cycles from each battery
+cycles_7 = max(unique(data7$cycle_number))-1
+cycles_30 = max(unique(data30$cycle_number))-1
+cycles_48 = max(unique(data48$cycle_number))-1
+```
+
+It is easier to clean individual battery dataset, then combine them in the end. 
+
+```{r}
+data7_discharge = data7[data7$charge_type=="Discharge",]
+data30_discharge = data30[data30$charge_type=="Discharge",]
+data48_discharge = data48[data48$charge_type=="Discharge",]
+```
+
+
+Based on the voltage curve, an important factor is the time it takes for the battery to decrement from 3.8 V to 3.5 V. It is saved as `t_decrement_38_35V`. 
+
+```{r}
+temp_max_cycle = rep(0,cycles_7)
+cycle_time = rep(0,cycles_7)
+time_to_max_temp = rep(0,cycles_7)
+capacity = rep(0,cycles_7)
+t_decrement_38_35V = rep(0,cycles_7)
+Re = rep(0,cycles_7)
+Rct = rep(0,cycles_7)
+ambient_temp = rep(0,cycles_7)
+for (each in 1:cycles_7){
+  df = data7_discharge[data7_discharge$cycle_number==each,]
+  temp_max_cycle[each] = max(df$Temperature_measured)
+  cycle_time[each] = tail(df$Time,1)
+  time_to_max_temp[each] = tail(df[1:which.max(df$Temperature_measured),]$Time,1)
+  condition1 = df$Voltage_measured <3.8 &df$Voltage_measured > 3.5
+  t_decrement_38_35V[each] = tail(df[condition1,]$Time,1)-df[condition1,]$Time[1]
+  capacity[each] = unique((df$Capacity))
+  Re[each] = unique(df$Re)
+  Rct[each] = unique(df$Rct)
+  ambient_temp[each] = unique(df$Ambient_Temp)
+
+}
+
+df_7 = data.frame(temp_max = temp_max_cycle,Amb_Temp = ambient_temp,cycle = 1:cycles_7,time_max_temp = time_to_max_temp,Capa = capacity,t_38_35V = t_decrement_38_35V,Re7=Re,Rct7=Rct)
+```
+
+
+`df_7` is our dataset by cycle.
+
+```{r}
+temp_max_cycle = rep(0,cycles_30)
+cycle_time = rep(0,cycles_30)
+time_to_max_temp = rep(0,cycles_30)
+capacity = rep(0,cycles_30)
+t_decrement_38_35V = rep(0,cycles_30)
+Re = rep(0,cycles_30)
+Rct = rep(0,cycles_30)
+ambient_temp = rep(0,cycles_30)
+for (each in 1:cycles_30){
+  df = data30_discharge[data30_discharge$cycle_number==each,]
+  temp_max_cycle[each] = max(df$Temperature_measured)
+  cycle_time[each] = tail(df$Time,1)
+  time_to_max_temp[each] = tail(df[1:which.max(df$Temperature_measured),]$Time,1)
+  condition1 = df$Voltage_measured <3.8 &df$Voltage_measured > 3.5
+  t_decrement_38_35V[each] = tail(df[condition1,]$Time,1)-df[condition1,]$Time[1]
+  capacity[each] = unique((df$Capacity))
+  Re[each] = unique(df$Re)
+  Rct[each] = unique(df$Rct)
+  ambient_temp[each] = unique(df$Ambient_Temp)
+
+}
+
+df_30 = data.frame(temp_max = temp_max_cycle,Amb_Temp = ambient_temp,cycle = 1:cycles_30,time_max_temp = time_to_max_temp,Capa = capacity,t_38_35V = t_decrement_38_35V,Re7=Re,Rct7=Rct)
+```
+
+`df_30` is our dataset by cycle
+
+
+```{r}
+temp_max_cycle = rep(0,cycles_48)
+cycle_time = rep(0,cycles_48)
+time_to_max_temp = rep(0,cycles_48)
+capacity = rep(0,cycles_48)
+t_decrement_38_35V = rep(0,cycles_48)
+Re = rep(0,cycles_48)
+Rct = rep(0,cycles_48)
+ambient_temp = rep(0,cycles_48)
+for (each in 1:cycles_48){
+  df = data48_discharge[data48_discharge$cycle_number==each,]
+  temp_max_cycle[each] = max(df$Temperature_measured)
+  cycle_time[each] = tail(df$Time,1)
+  time_to_max_temp[each] = tail(df[1:which.max(df$Temperature_measured),]$Time,1)
+  condition1 = df$Voltage_measured <3.8 &df$Voltage_measured > 3.5
+  t_decrement_38_35V[each] = tail(df[condition1,]$Time,1)-df[condition1,]$Time[1]
+  capacity[each] = unique((df$Capacity))
+  Re[each] = unique(df$Re)
+  Rct[each] = unique(df$Rct)
+  ambient_temp[each] = unique(df$Ambient_Temp)
+
+}
+
+df_48 = data.frame(temp_max = temp_max_cycle,Amb_Temp = ambient_temp,cycle = 1:cycles_48,time_max_temp = time_to_max_temp,Capa = capacity,t_38_35V = t_decrement_38_35V,Re7=Re,Rct7=Rct)
+```
+
+`df_48` is our dataset by cycle
+
+Now we combine:
+
+
+```{r}
+cycle_data_full =  rbind(df_7,df_30,df_48)
+```
+
