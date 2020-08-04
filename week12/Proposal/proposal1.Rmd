@@ -1,0 +1,50 @@
+---
+title: "Final Project Proposal"
+author: "Sara Kohtz, Xuenan Mi, Bruno Seo, Jackie Kang"
+date: ''
+output:
+  html_document: 
+    theme: readable
+    toc: yes
+  pdf_document: default
+urlcolor: cyan
+---
+
+
+```{r setup, echo = FALSE, message = FALSE, warning = FALSE}
+options(scipen = 1, digits = 4, width = 80, fig.alin = "center")
+```
+
+# Title: *Li-ion Battery Health Degradation Analysis*
+ 
+
+## Motivation
+
+The motivation behind this project is determine factors that lead to increased Li-ion battery degradation. Li-ion batteries are utilized in everyday objects, such as computers and cell phones. More recently, they have been utilized in electric vehicles. Therefore, it is imperative to accurately determine remaining useful life of Li-ion batteries, which can be directly linked to internal resistance and capacity within the battery. 
+
+## Data file
+
+The data file is obtained from the NASA Prognostics Center of Excellence (PCoE) website. The link is provided in this reference [1]. On the site, it is under set number five, which is labelled "Battery Data Set." There are six datasets, each of which contains experiments for roughly four batteries. The experiment entails charging and discharging a 4.2-volt li-ion battery until the capacity degrades by 30%.  For each dataset, one of three ambient temperatures (5$\circ$C, 20$\circ$C, 40$\circ$C) is set for the entire experiment. Currently, the dataset is in a .mat format, but it has been converted to .csv for easy input into R.
+
+## Variables
+
+The group plans to define `Capacity` as the response variable, with the rest of given variables as predictors. We have two variables we can define as categorical: ambient temperature and "charging/discharging state." The rest of the variables are: terminal voltage (labelled as `Voltage_measured` in the dataset), current within the battery (Amps), time within the cycle (sec), cycle number, internal electrolyte resistance (`Re` Ohms), transfer resistance (`Rct` Ohms), external voltage (Volts), and internal measured temperature. The total number of observations for each battery is around 100,000; the observations include both "charging" and "discharging" observations. Three of the batteries are attached in the zip file, and the following shows a couple of rows of battery 30. 
+
+```{r message=FALSE, warning=FALSE}
+library(readr)
+B_30 = read_csv("B30_reorganized_data.csv")
+head(B_30,5)
+```
+
+And to show some of the other variables:
+
+```{r message=FALSE, warning=FALSE}
+library(dplyr)
+other_cols = select(B_30,Voltage_measured, cycle_number,charge_type,Current,Ambient_Temp)
+head(other_cols,5)
+```
+
+
+## References
+1.	B. Saha and K. Goebel (2007). "Battery Data Set", NASA Ames Prognostics Data Repository [linked phrase](https://ti.arc.nasa.gov/tech/dash/groups/pcoe/prognostic-data-repository/, NASA Ames Research Center, Moffett Field, CA
+
