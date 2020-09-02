@@ -76,7 +76,7 @@ rsme(aic_model)
 ?mtcars
 library(car)
 car_model = lm(mpg~., data=mtcars)
-which.max(vif(car_model))
+max(vif(car_model))
 ```
 
 
@@ -108,7 +108,7 @@ rsme(aic_model)
 
 ```{r}
 # 6
-which.max(vif(aic_model))
+max(vif(aic_model))
 ```
 
 ```{r}
@@ -169,7 +169,11 @@ rsme(life_model_add)
 
 ```{r}
 # 15
-
+max(
+summary(life_model_twoway)$adj.r.squared,
+summary(aic_model)$adj.r.squared,
+summary(life_model_add)$adj.r.squared
+)
 ```
 
 
